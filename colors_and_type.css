@@ -1,0 +1,294 @@
+/* ═══════════════════════════════════════════════════════════════════
+   MESO — Colors & Type
+   Design System v1.0 · 2026
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Funnel+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Tokens ────────────────────────────────────────────────────────── */
+:root {
+  /* Surfaces — three only */
+  --stone:          #F4F3F0;     /* page background — never pure white */
+  --stone-2:        #ECEAE7;     /* hover surfaces, skeletons */
+  --white:          #FFFFFF;     /* card surface only */
+  --ink:            #141412;     /* brand + primary text + dark surface */
+  --ink-soft:       #1E1D1B;     /* toasts, dark card surface */
+
+  /* Text hierarchy */
+  --text-primary:   #141412;
+  --text-secondary: #6B6966;
+  --text-tertiary:  #A8A6A2;
+
+  /* Primary accent — the ONLY "branded" colour */
+  --teal:           #1A6B5C;
+  --teal-mid:       #23876E;
+  --teal-soft:      rgba(26, 107, 92, 0.09);
+  --teal-border:    rgba(26, 107, 92, 0.25);
+
+  /* Secondary accents — radial gradient BLOOMS ONLY
+     Never flat fills, never text, never buttons.
+     Always paired with teal. Max 2 colours per surface. */
+  --blue:           #3A5CA8;    /* System · technical · CTO/CIO */
+  --indigo:         #5844BA;    /* Intelligence · AI layer */
+  --amber:          #C27C24;    /* Urgency · campaign */
+  --rose:           #A84458;    /* Human · CHRO / people */
+
+  /* Semantic */
+  --error:          #C0392B;
+  --success:        var(--teal);
+
+  /* Borders (hairlines on stone) */
+  --border:         rgba(20, 20, 18, 0.09);
+  --border-mid:     rgba(20, 20, 18, 0.14);
+  --border-strong:  rgba(20, 20, 18, 0.22);
+
+  /* Shadows — three levels, never borders on cards */
+  --shadow-1:       0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-2:       0 4px 16px rgba(0, 0, 0, 0.10);
+  --shadow-3:       0 16px 48px rgba(0, 0, 0, 0.18);
+
+  /* Radii */
+  --radius-sm:      5px;   /* pills */
+  --radius-md:      8px;   /* buttons, inputs */
+  --radius-lg:      12px;  /* cards, toasts */
+  --radius-xl:      16px;  /* modals */
+
+  /* Motion */
+  --ease:           cubic-bezier(0.16, 1, 0.3, 1);  /* ease-out */
+  --ease-in:        cubic-bezier(0.7, 0, 0.84, 0);
+  --t-fast:         100ms;
+  --t-micro:        150ms;
+  --t-medium:       200ms;
+  --t-slow:         400ms;
+  --stagger:        60ms;
+
+  /* Spacing — 8px base, generous at section, tight at component */
+  --sp-xs:          4px;
+  --sp-s:           8px;
+  --sp-m:           16px;
+  --sp-l:           24px;
+  --sp-xl:          40px;
+  --sp-2xl:         48px;
+  --sp-3xl:         80px;
+  --sp-4xl:         120px;
+
+  /* Layout */
+  --page-max:       1040px;
+  --page-pad:       48px;
+  --page-pad-mobile: 20px;
+
+  /* Type families */
+  --font-display:   'Funnel Display', system-ui, sans-serif;
+  --font-body:      'Inter', system-ui, sans-serif;
+  --font-mono:      'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+  /* Semantic type — role → size / weight / tracking / lh */
+  --h-hero-size:     84px;
+  --h-hero-weight:   700;
+  --h-hero-ls:       -3px;
+  --h-hero-lh:       1.0;
+
+  --h1-size:         44px;
+  --h1-weight:       700;
+  --h1-ls:           -1.5px;
+  --h1-lh:           1.04;
+
+  --h2-size:         28px;
+  --h2-weight:       700;
+  --h2-ls:           -0.8px;
+  --h2-lh:           1.1;
+
+  --h3-size:         20px;
+  --h3-weight:       600;
+  --h3-ls:           -0.4px;
+  --h3-lh:           1.2;
+
+  --body-lg-size:    17px;
+  --body-lg-lh:      1.70;
+
+  --body-size:       14px;
+  --body-lh:         1.65;
+
+  --ui-size:         13px;
+  --ui-weight:       500;
+
+  --label-a-size:    10px;    /* uppercase, 0.10em */
+  --label-a-weight:  600;
+  --label-a-tracking: 0.10em;
+
+  --label-b-size:    11px;    /* sentence case, no tracking */
+  --label-b-weight:  500;
+
+  --mono-size:       12px;
+  --mono-lh:         1.8;
+}
+
+/* ── Dark mode tokens ──────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --stone:          #0F0F0D;
+    --stone-2:        #161613;
+    --white:          #1E1D1B;              /* card surface in dark */
+    --text-primary:   rgba(244, 243, 240, 0.92);
+    --text-secondary: rgba(244, 243, 240, 0.62);
+    --text-tertiary:  rgba(244, 243, 240, 0.36);
+    --teal-soft:      rgba(26, 107, 92, 0.20);
+    --teal-border:    rgba(26, 107, 92, 0.30);
+    --border:         rgba(255, 255, 255, 0.07);
+    --border-mid:     rgba(255, 255, 255, 0.12);
+    --border-strong:  rgba(255, 255, 255, 0.20);
+  }
+}
+
+/* Explicit dark override (user-preferred) */
+[data-theme="dark"] {
+  --stone:          #0F0F0D;
+  --stone-2:        #161613;
+  --white:          #1E1D1B;
+  --text-primary:   rgba(244, 243, 240, 0.92);
+  --text-secondary: rgba(244, 243, 240, 0.62);
+  --text-tertiary:  rgba(244, 243, 240, 0.36);
+  --teal-soft:      rgba(26, 107, 92, 0.20);
+  --teal-border:    rgba(26, 107, 92, 0.30);
+  --border:         rgba(255, 255, 255, 0.07);
+  --border-mid:     rgba(255, 255, 255, 0.12);
+  --border-strong:  rgba(255, 255, 255, 0.20);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--stone);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Semantic type classes ─────────────────────────────────────────── */
+.t-hero {
+  font-family: var(--font-display);
+  font-size: var(--h-hero-size); font-weight: var(--h-hero-weight);
+  letter-spacing: var(--h-hero-ls); line-height: var(--h-hero-lh);
+  color: var(--text-primary);
+}
+.t-h1 {
+  font-family: var(--font-display);
+  font-size: var(--h1-size); font-weight: var(--h1-weight);
+  letter-spacing: var(--h1-ls); line-height: var(--h1-lh);
+  color: var(--text-primary);
+}
+.t-h2 {
+  font-family: var(--font-display);
+  font-size: var(--h2-size); font-weight: var(--h2-weight);
+  letter-spacing: var(--h2-ls); line-height: var(--h2-lh);
+  color: var(--text-primary);
+}
+.t-h3 {
+  font-family: var(--font-display);
+  font-size: var(--h3-size); font-weight: var(--h3-weight);
+  letter-spacing: var(--h3-ls); line-height: var(--h3-lh);
+  color: var(--text-primary);
+}
+.t-body-lg {
+  font-family: var(--font-body);
+  font-size: var(--body-lg-size); line-height: var(--body-lg-lh);
+  color: var(--text-secondary);
+}
+.t-body {
+  font-family: var(--font-body);
+  font-size: var(--body-size); line-height: var(--body-lh);
+  color: var(--text-secondary);
+}
+.t-ui {
+  font-family: var(--font-body);
+  font-size: var(--ui-size); font-weight: var(--ui-weight);
+  color: var(--text-primary);
+}
+.t-label-a {
+  font-family: var(--font-body);
+  font-size: var(--label-a-size); font-weight: var(--label-a-weight);
+  letter-spacing: var(--label-a-tracking);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.t-label-a-teal {
+  font-family: var(--font-body);
+  font-size: var(--label-a-size); font-weight: var(--label-a-weight);
+  letter-spacing: var(--label-a-tracking);
+  text-transform: uppercase;
+  color: var(--teal);
+}
+.t-label-b {
+  font-family: var(--font-body);
+  font-size: var(--label-b-size); font-weight: var(--label-b-weight);
+  color: var(--text-secondary);
+}
+.t-mono {
+  font-family: var(--font-mono);
+  font-size: var(--mono-size); line-height: var(--mono-lh);
+  color: var(--teal);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Gradient blooms (secondary accents) ───────────────────────────── */
+.bloom-dark-teal {
+  background: #0F0F0D;
+  background-image: radial-gradient(ellipse 80% 70% at 80% 20%, rgba(26,107,92,0.38) 0%, transparent 65%);
+}
+.bloom-stone-teal {
+  background: var(--stone);
+  background-image: radial-gradient(ellipse 80% 70% at 80% 20%, rgba(26,107,92,0.18) 0%, transparent 65%);
+}
+.bloom-dark-blue {
+  background: #0A0B10;
+  background-image:
+    radial-gradient(ellipse 80% 70% at 80% 20%, rgba(58,92,168,0.40) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 10% 80%, rgba(26,107,92,0.28) 0%, transparent 60%);
+}
+.bloom-stone-blue {
+  background: var(--stone);
+  background-image:
+    radial-gradient(ellipse 80% 70% at 80% 20%, rgba(58,92,168,0.13) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 10% 80%, rgba(26,107,92,0.08) 0%, transparent 60%);
+}
+.bloom-dark-indigo {
+  background: #090910;
+  background-image:
+    radial-gradient(ellipse 80% 70% at 80% 20%, rgba(88,68,186,0.45) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 10% 80%, rgba(26,107,92,0.28) 0%, transparent 60%);
+}
+.bloom-stone-indigo {
+  background: var(--stone);
+  background-image:
+    radial-gradient(ellipse 80% 70% at 80% 20%, rgba(88,68,186,0.12) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 10% 80%, rgba(26,107,92,0.07) 0%, transparent 60%);
+}
+.bloom-dark-amber {
+  background: #0E0C08;
+  background-image:
+    radial-gradient(ellipse 80% 70% at 80% 20%, rgba(194,124,36,0.38) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 10% 80%, rgba(26,107,92,0.28) 0%, transparent 60%);
+}
+.bloom-stone-amber {
+  background: var(--stone);
+  background-image:
+    radial-gradient(ellipse 80% 70% at 80% 20%, rgba(194,124,36,0.13) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 10% 80%, rgba(26,107,92,0.07) 0%, transparent 60%);
+}
+.bloom-dark-rose {
+  background: #0F0C0C;
+  background-image:
+    radial-gradient(ellipse 80% 70% at 80% 20%, rgba(168,68,88,0.35) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 10% 80%, rgba(26,107,92,0.28) 0%, transparent 60%);
+}
+.bloom-stone-rose {
+  background: var(--stone);
+  background-image:
+    radial-gradient(ellipse 80% 70% at 80% 20%, rgba(168,68,88,0.11) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 10% 80%, rgba(26,107,92,0.07) 0%, transparent 60%);
+}
