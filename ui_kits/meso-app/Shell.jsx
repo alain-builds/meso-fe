@@ -2,10 +2,19 @@ import { useState } from 'react'
 import { colors, duration, easing, radii, fontFamilies } from '@/tokens'
 import { Icon, Button } from './Components'
 
-const NAV_ITEMS = [
-  { id: 'organization', icon: 'building-2', label: 'Organization' },
-  { id: 'governance',   icon: 'shield',     label: 'Governance'   },
-  { id: 'services',     icon: 'network',    label: 'Services'     },
+const TOP_NAV = [
+  { id: 'canvas',    icon: 'layout-grid',  label: 'Canvas'    },
+  { id: 'strategy',  icon: 'arrow-up-right', label: 'Strategy' },
+  { id: 'analytics', icon: 'bar-chart',    label: 'Analytics' },
+]
+
+const RECORDS_ITEMS = [
+  { id: 'people',            icon: 'users',       label: 'People'            },
+  { id: 'roles',             icon: 'id-card',     label: 'Roles'             },
+  { id: 'teams',             icon: 'users-round', label: 'Teams'             },
+  { id: 'services',          icon: 'network',     label: 'Services'          },
+  { id: 'processes',         icon: 'workflow',    label: 'Processes'         },
+  { id: 'governance-bodies', icon: 'gavel',       label: 'Governance Bodies' },
 ]
 
 const btnRow = {
@@ -15,12 +24,41 @@ const btnRow = {
   font: 'inherit', textAlign: 'left',
 }
 
+const NavItem = ({ item, isActive, onNavigate, expanded, micro, sub = false }) => (
+  <button
+    aria-label={item.label}
+    aria-current={isActive ? 'page' : undefined}
+    onClick={() => onNavigate(item.id)}
+    style={{
+      ...btnRow,
+      gap: 14,
+      paddingTop: sub ? 7 : 9,
+      paddingBottom: sub ? 7 : 9,
+      paddingLeft: expanded && sub ? 32 : 20,
+      paddingRight: 20,
+      background: isActive ? colors.tealSoft : 'transparent',
+      transition: `background ${micro}`,
+    }}
+    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = colors.stone }}
+    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
+    <div style={{ flexShrink: 0, display: 'flex', width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
+      <Icon name={item.icon} size={sub ? 16 : 20} color={isActive ? colors.teal : colors.textSecondary} strokeWidth={isActive ? 2 : 1.5} />
+    </div>
+    {expanded && (
+      <span style={{ fontSize: sub ? 12 : 13, color: isActive ? colors.teal : colors.textSecondary, fontWeight: isActive ? 500 : 400, whiteSpace: 'nowrap' }}>
+        {item.label}
+      </span>
+    )}
+  </button>
+)
+
 const Sidebar = ({
   active,
   onNavigate,
   user = { initials: 'AD', name: 'Alain Dunphy', role: 'Admin' },
 }) => {
   const [expanded, setExpanded] = useState(false)
+  const [recordsOpen, setRecordsOpen] = useState(true)
   const micro  = `${duration.micro}  ${easing.out}`
   const medium = `${duration.medium} ${easing.out}`
 
@@ -56,53 +94,81 @@ const Sidebar = ({
       </div>
 
       {/* Search */}
-      <div style={{ padding: '10px 12px', borderBottom: `1px solid ${colors.border}` }}>
+      <div style={{ padding: '10px 12px', borderBottom: `1px solid ${colors.border}`, flexShrink: 0 }}>
         <button
-          aria-label="Search"
+          aria-label="Search (Ctrl+K)"
           style={{
             ...btnRow,
-            justifyContent: 'center',
-            gap: expanded ? 8 : 0,
-            padding: '8px', borderRadius: radii.md,
+            justifyContent: expanded ? 'space-between' : 'center',
+            padding: expanded ? '8px 10px' : '8px',
+            borderRadius: radii.md,
             background: colors.ink,
             transition: `opacity ${micro}`,
           }}
           onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-          <Icon name="search" size={16} color={colors.white} strokeWidth={1.5} />
-          {expanded && <span style={{ fontSize: 13, fontWeight: 500, color: colors.white, whiteSpace: 'nowrap' }}>Search</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Icon name="search" size={16} color={colors.white} strokeWidth={1.5} />
+            {expanded && <span style={{ fontSize: 13, fontWeight: 500, color: colors.white, whiteSpace: 'nowrap' }}>Search</span>}
+          </div>
+          {expanded && (
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap', letterSpacing: '0.2px', fontFamily: fontFamilies.body }}>
+              Ctrl K
+            </span>
+          )}
         </button>
       </div>
 
       {/* Main nav */}
-      <nav style={{ padding: '12px 0', flex: 1 }}>
-        {NAV_ITEMS.map(it => {
-          const isActive = active === it.id
-          return (
-            <button
-              key={it.id}
-              aria-label={it.label}
-              aria-current={isActive ? 'page' : undefined}
-              onClick={() => onNavigate(it.id)}
-              style={{
-                ...btnRow,
-                gap: 14, padding: '9px 20px',
-                background: isActive ? colors.tealSoft : 'transparent',
-                transition: `background ${micro}`,
-              }}
-              onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = colors.stone }}
-              onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
-              <div style={{ flexShrink: 0, display: 'flex', width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
-                <Icon name={it.icon} size={20} color={isActive ? colors.teal : colors.textSecondary} strokeWidth={isActive ? 2 : 1.5} />
-              </div>
-              {expanded && (
-                <span style={{ fontSize: 13, color: isActive ? colors.teal : colors.textSecondary, fontWeight: isActive ? 500 : 400, whiteSpace: 'nowrap' }}>
-                  {it.label}
+      <nav style={{ padding: '12px 0', flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+        {TOP_NAV.map(it => (
+          <NavItem key={it.id} item={it} isActive={active === it.id} onNavigate={onNavigate} expanded={expanded} micro={micro} />
+        ))}
+
+        {/* Records group */}
+        <div style={{ marginTop: 4 }}>
+          <button
+            aria-label="Records"
+            aria-expanded={recordsOpen}
+            onClick={() => setRecordsOpen(o => !o)}
+            style={{
+              ...btnRow,
+              gap: 14, padding: '9px 20px',
+              transition: `background ${micro}`,
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = colors.stone}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <div style={{ flexShrink: 0, display: 'flex', width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="layers" size={20} color={colors.textSecondary} strokeWidth={1.5} />
+            </div>
+            {expanded && (
+              <>
+                <span style={{ fontSize: 13, color: colors.textSecondary, fontWeight: 400, whiteSpace: 'nowrap', flex: 1 }}>
+                  Records
                 </span>
-              )}
-            </button>
-          )
-        })}
+                <Icon
+                  name={recordsOpen ? 'chevron-down' : 'chevron-right'}
+                  size={14}
+                  color={colors.textTertiary}
+                  strokeWidth={1.5}
+                  style={{ flexShrink: 0, marginRight: 6 }}
+                />
+              </>
+            )}
+          </button>
+
+          {recordsOpen && RECORDS_ITEMS.map(it => (
+            <NavItem
+              key={it.id}
+              item={it}
+              isActive={active === it.id}
+              onNavigate={onNavigate}
+              expanded={expanded}
+              micro={micro}
+              sub
+            />
+          ))}
+        </div>
       </nav>
 
       {/* Bottom: Settings → Support → User profile */}
@@ -123,13 +189,14 @@ const Sidebar = ({
           ))}
         </div>
 
+        {/* Fixed left-align so avatar never jumps on expand/collapse */}
         <button
           aria-label="User profile"
           style={{
             ...btnRow,
             borderTop: `1px solid ${colors.border}`,
-            padding: expanded ? '12px 20px 16px' : '12px 0 16px',
-            justifyContent: expanded ? 'flex-start' : 'center',
+            padding: '12px 20px 16px',
+            justifyContent: 'flex-start',
             gap: 10,
             transition: `background ${micro}`,
           }}
@@ -155,14 +222,7 @@ const Sidebar = ({
   )
 }
 
-const getGreeting = () => {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 18) return 'Good afternoon'
-  return 'Good evening'
-}
-
-const Header = ({ onNewTeam }) => (
+const Header = ({ pageTitle, breadcrumbs = [], onShare }) => (
   <div style={{
     height: 60,
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -171,12 +231,42 @@ const Header = ({ onNewTeam }) => (
     background: colors.stone,
     position: 'sticky', top: 0, zIndex: 10,
   }}>
-    <span style={{ fontFamily: fontFamilies.display, fontWeight: 600, fontSize: 20, letterSpacing: '-0.4px', color: colors.ink }}>
-      {getGreeting()}, Alain
-    </span>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
+      {pageTitle && (
+        <span style={{
+          fontFamily: fontFamilies.display,
+          fontWeight: 600,
+          fontSize: 18,
+          letterSpacing: '-0.3px',
+          color: colors.ink,
+          lineHeight: 1.2,
+        }}>
+          {pageTitle}
+        </span>
+      )}
+      {breadcrumbs.length > 0 && (
+        <nav aria-label="Breadcrumb">
+          <span style={{
+            fontFamily: fontFamilies.body,
+            fontSize: 11,
+            fontWeight: 400,
+            color: colors.textTertiary,
+            display: 'flex', alignItems: 'center', gap: 3,
+            lineHeight: 1,
+          }}>
+            {breadcrumbs.map((crumb, i) => (
+              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                {i > 0 && <span style={{ color: colors.borderMid }}>›</span>}
+                <span>{crumb}</span>
+              </span>
+            ))}
+          </span>
+        </nav>
+      )}
+    </div>
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <Button variant="stone" size="sm" icon="sparkles">Ask AI</Button>
-      <Button variant="primary" size="sm" icon="plus" onClick={onNewTeam}>Add</Button>
+      <Button variant="secondary" size="sm" icon="share-2" onClick={onShare}>Share</Button>
     </div>
   </div>
 )

@@ -24,8 +24,17 @@ function EmptyPanel({ label }) {
   )
 }
 
+const RECORD_IDS = new Set(['people', 'roles', 'teams', 'services', 'processes', 'governance-bodies'])
+
+function getPageInfo(active, openTeam) {
+  const label = active.charAt(0).toUpperCase() + active.slice(1).replace(/-/g, ' ')
+  if (openTeam) return { pageTitle: label, breadcrumbs: ['Records', label, openTeam.name] }
+  if (RECORD_IDS.has(active)) return { pageTitle: label, breadcrumbs: ['Records', label] }
+  return { pageTitle: label, breadcrumbs: [] }
+}
+
 function App() {
-  const [active, setActive] = useState('organization')
+  const [active, setActive] = useState('teams')
   const [openTeam, setOpenTeam] = useState(null)
   const [modal, setModal] = useState(false)
   const [toast, setToast] = useState(null)
@@ -41,6 +50,8 @@ function App() {
     setTimeout(() => setToast(null), 4000)
   }
 
+  const { pageTitle, breadcrumbs } = getPageInfo(active, openTeam)
+
   return (
     <div>
       <Sidebar
@@ -49,16 +60,18 @@ function App() {
       />
       <div style={{ marginLeft: 60, minHeight: '100vh', background: colors.stone }}>
         <Header
-          onNewTeam={() => showToast('success', 'New team workflow started. Assign an owner to activate.')}
+          pageTitle={pageTitle}
+          breadcrumbs={breadcrumbs}
+          onShare={() => showToast('info', 'Link copied to clipboard.')}
         />
         <div key={openTeam ? openTeam.id : active} className="rise">
-          {active === 'organization' && !openTeam && (
+          {active === 'teams' && !openTeam && (
             <TeamsScreen onOpenTeam={setOpenTeam} loading={loading} />
           )}
           {openTeam && (
             <TeamDetail team={openTeam} onBack={() => setOpenTeam(null)} onRemove={() => setModal(true)} />
           )}
-          {active !== 'organization' && !openTeam && <EmptyPanel label={active} />}
+          {active !== 'teams' && !openTeam && <EmptyPanel label={active} />}
         </div>
       </div>
 
