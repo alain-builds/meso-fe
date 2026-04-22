@@ -33,7 +33,7 @@
 const { useState, useEffect } = React;
 
 function App() {
-  const [active, setActive] = useState('teams');
+  const [active, setActive] = useState('organization');
   const [openTeam, setOpenTeam] = useState(null);
   const [modal, setModal] = useState(false);
   const [toast, setToast] = useState(null);
@@ -49,20 +49,17 @@ function App() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const crumbs = openTeam ? ['Operating model', 'Teams', openTeam.name] : [active === 'teams' ? 'Operating model' : '', active.charAt(0).toUpperCase() + active.slice(1)];
-
   return (
     <div>
       <Sidebar active={active} onNavigate={(id) => { setActive(id); setOpenTeam(null); }} />
       <div style={{ marginLeft: 60, minHeight: '100vh', background: '#F4F3F0' }}>
         <Header
-          crumbs={crumbs}
           onNewTeam={() => showToast('success', 'New team workflow started. Assign an owner to activate.')}
         />
         <div key={openTeam ? openTeam.id : active} className="rise">
-          {active === 'teams' && !openTeam && <TeamsScreen onOpenTeam={setOpenTeam} loading={loading} />}
+          {active === 'organization' && !openTeam && <TeamsScreen onOpenTeam={setOpenTeam} loading={loading} />}
           {openTeam && <TeamDetail team={openTeam} onBack={() => setOpenTeam(null)} onRemove={() => setModal(true)} />}
-          {active !== 'teams' && !openTeam && <EmptyPanel label={active} />}
+          {active !== 'organization' && !openTeam && <EmptyPanel label={active} />}
         </div>
       </div>
 

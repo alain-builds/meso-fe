@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python --version)",
+      "Bash(python3 --version)",
+      "Bash(node --version)",
+      "Bash(npx --yes serve . -p 3131)",
+      "Bash(curl -s http://localhost:3131/index.html)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s http://localhost:3131/Shell.jsx)",
+      "Bash(curl -s http://localhost:3131/)",
+      "Bash(start http://localhost:3131/)"
+    ]
+  }
+}

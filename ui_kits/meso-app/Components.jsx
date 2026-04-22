@@ -27,6 +27,7 @@ const Icon = ({ name, size = 20, color = 'currentColor', strokeWidth = 1.5, styl
     'building-2': <><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></>,
     'arrow-up-right': <><path d="M7 7h10v10"/><path d="M7 17 17 7"/></>,
     'history': <><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></>,
+    'sparkles': <><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></>,
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style} aria-hidden="true">
@@ -55,12 +56,13 @@ const Button = ({ children, variant = 'primary', size = 'md', icon, onClick, dis
     teal: { background: '#1A6B5C', color: '#fff', borderColor: '#1A6B5C' },
     ghost: { background: 'transparent', color: '#6B6966', borderColor: 'transparent', padding: '11px 0' },
     danger: { background: '#C0392B', color: '#fff', borderColor: '#C0392B' },
+    stone: { background: '#ECEAE7', color: '#141412', borderColor: 'transparent' },
   };
   return (
     <button type={type} onClick={onClick} disabled={disabled}
       style={{ ...base, ...sizes[size], ...variants[variant] }}
-      onMouseEnter={e => { if (!disabled && variant === 'primary') e.currentTarget.style.opacity = 0.88; if (!disabled && variant === 'secondary') { e.currentTarget.style.borderColor = 'rgba(20,20,18,0.22)'; e.currentTarget.style.background = '#ECEAE7'; } if (!disabled && variant === 'teal') e.currentTarget.style.opacity = 0.9; }}
-      onMouseLeave={e => { e.currentTarget.style.opacity = disabled ? 0.4 : 1; if (variant === 'secondary') { e.currentTarget.style.borderColor = 'rgba(20,20,18,0.14)'; e.currentTarget.style.background = 'transparent'; } }}>
+      onMouseEnter={e => { if (!disabled && variant === 'primary') e.currentTarget.style.opacity = 0.88; if (!disabled && variant === 'secondary') { e.currentTarget.style.borderColor = 'rgba(20,20,18,0.22)'; e.currentTarget.style.background = '#ECEAE7'; } if (!disabled && variant === 'teal') e.currentTarget.style.opacity = 0.9; if (!disabled && variant === 'stone') e.currentTarget.style.background = '#DCDAD7'; }}
+      onMouseLeave={e => { e.currentTarget.style.opacity = disabled ? 0.4 : 1; if (variant === 'secondary') { e.currentTarget.style.borderColor = 'rgba(20,20,18,0.14)'; e.currentTarget.style.background = 'transparent'; } if (variant === 'stone') e.currentTarget.style.background = '#ECEAE7'; }}>
       {icon && <Icon name={icon} size={16} />}
       {children}
     </button>
