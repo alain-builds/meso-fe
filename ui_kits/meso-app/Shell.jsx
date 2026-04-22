@@ -14,7 +14,7 @@ const RECORDS_ITEMS = [
   { id: 'teams',             icon: 'users-round', label: 'Teams'             },
   { id: 'services',          icon: 'network',     label: 'Services'          },
   { id: 'processes',         icon: 'workflow',    label: 'Processes'         },
-  { id: 'governance-bodies', icon: 'gavel',       label: 'Governance Bodies' },
+  { id: 'governance-bodies', icon: 'gavel',       label: 'Governance'        },
 ]
 
 const btnRow = {
@@ -23,6 +23,9 @@ const btnRow = {
   cursor: 'pointer', padding: 0, width: '100%',
   font: 'inherit', textAlign: 'left',
 }
+
+const micro  = `${duration.micro} ${easing.out}`
+const medium = `${duration.medium} ${easing.out}`
 
 const NavItem = ({ item, isActive, onNavigate, expanded, micro, sub = false }) => (
   <button
@@ -52,15 +55,9 @@ const NavItem = ({ item, isActive, onNavigate, expanded, micro, sub = false }) =
   </button>
 )
 
-const Sidebar = ({
-  active,
-  onNavigate,
-  user = { initials: 'AD', name: 'Alain Dunphy', role: 'Admin' },
-}) => {
+const Sidebar = ({ active, onNavigate }) => {
   const [expanded, setExpanded] = useState(false)
   const [recordsOpen, setRecordsOpen] = useState(true)
-  const micro  = `${duration.micro}  ${easing.out}`
-  const medium = `${duration.medium} ${easing.out}`
 
   return (
     <div
@@ -109,7 +106,7 @@ const Sidebar = ({
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Icon name="search" size={16} color={colors.white} strokeWidth={1.5} />
-            {expanded && <span style={{ fontSize: 13, fontWeight: 500, color: colors.white, whiteSpace: 'nowrap' }}>Search</span>}
+            {expanded && <span style={{ fontSize: 13, fontWeight: 500, color: colors.white, whiteSpace: 'nowrap', lineHeight: '16px' }}>Search</span>}
           </div>
           {expanded && (
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap', letterSpacing: '0.2px', fontFamily: fontFamilies.body }}>
@@ -125,37 +122,43 @@ const Sidebar = ({
           <NavItem key={it.id} item={it} isActive={active === it.id} onNavigate={onNavigate} expanded={expanded} micro={micro} />
         ))}
 
+        {/* Section divider */}
+        <div style={{ height: 1, background: colors.border, margin: '8px 0' }} />
+
         {/* Records group */}
-        <div style={{ marginTop: 4 }}>
-          <button
-            aria-label="Records"
-            aria-expanded={recordsOpen}
-            onClick={() => setRecordsOpen(o => !o)}
-            style={{
-              ...btnRow,
-              gap: 14, padding: '9px 20px',
-              transition: `background ${micro}`,
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = colors.stone}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            <div style={{ flexShrink: 0, display: 'flex', width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="layers" size={20} color={colors.textSecondary} strokeWidth={1.5} />
-            </div>
-            {expanded && (
-              <>
-                <span style={{ fontSize: 13, color: colors.textSecondary, fontWeight: 400, whiteSpace: 'nowrap', flex: 1 }}>
+        <div>
+          {expanded ? (
+            <div style={{ display: 'flex', alignItems: 'center', padding: '2px 8px 2px 14px', gap: 4 }}>
+              <button
+                aria-label="Toggle Records"
+                aria-expanded={recordsOpen}
+                onClick={() => setRecordsOpen(o => !o)}
+                style={{ ...btnRow, width: 'auto', flex: 1, gap: 4, padding: '4px 0' }}>
+                <Icon name={recordsOpen ? 'chevron-down' : 'chevron-right'} size={12} color={colors.textTertiary} strokeWidth={2} />
+                <span style={{ fontFamily: fontFamilies.display, fontSize: 12, fontWeight: 600, color: colors.ink, whiteSpace: 'nowrap' }}>
                   Records
                 </span>
-                <Icon
-                  name={recordsOpen ? 'chevron-down' : 'chevron-right'}
-                  size={14}
-                  color={colors.textTertiary}
-                  strokeWidth={1.5}
-                  style={{ flexShrink: 0, marginRight: 6 }}
-                />
-              </>
-            )}
-          </button>
+              </button>
+              <button
+                aria-label="Section settings"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 22, height: 22, borderRadius: radii.sm,
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  transition: `background ${micro}`,
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = colors.stone}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <Icon name="settings" size={13} color={colors.textTertiary} strokeWidth={1.5} />
+              </button>
+            </div>
+          ) : (
+            <div style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontFamily: fontFamilies.body, fontSize: 9, fontWeight: 500, color: colors.textTertiary, letterSpacing: '0.2px' }}>
+                Records
+              </span>
+            </div>
+          )}
 
           {recordsOpen && RECORDS_ITEMS.map(it => (
             <NavItem
@@ -165,13 +168,12 @@ const Sidebar = ({
               onNavigate={onNavigate}
               expanded={expanded}
               micro={micro}
-              sub
             />
           ))}
         </div>
       </nav>
 
-      {/* Bottom: Settings → Support → User profile */}
+      {/* Bottom: Settings → Support → Invite team members */}
       <div style={{ borderTop: `1px solid ${colors.border}`, flexShrink: 0 }}>
         <div style={{ padding: '8px 0' }}>
           {[['settings', 'Settings'], ['info', 'Support']].map(([icon, label]) => (
@@ -189,40 +191,37 @@ const Sidebar = ({
           ))}
         </div>
 
-        {/* Fixed left-align so avatar never jumps on expand/collapse */}
-        <button
-          aria-label="User profile"
-          style={{
-            ...btnRow,
-            borderTop: `1px solid ${colors.border}`,
-            padding: '12px 20px 16px',
-            justifyContent: 'flex-start',
-            gap: 10,
-            transition: `background ${micro}`,
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = colors.stone}
-          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-          <div style={{
-            width: 32, height: 32, borderRadius: '50%',
-            background: colors.ink, color: colors.stone,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, fontWeight: 500, flexShrink: 0,
-          }}>
-            {user.initials}
-          </div>
-          {expanded && (
-            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              <span style={{ fontSize: 13, color: colors.ink, fontWeight: 500, whiteSpace: 'nowrap' }}>{user.name}</span>
-              <span style={{ fontSize: 11, color: colors.textTertiary, whiteSpace: 'nowrap' }}>{user.role}</span>
+        <div style={{ borderTop: `1px solid ${colors.border}`, padding: expanded ? '8px 12px 12px' : '8px 0 12px' }}>
+          <button
+            aria-label="Invite team members"
+            style={{
+              ...btnRow,
+              gap: 8,
+              padding: expanded ? '7px 10px' : '9px 20px',
+              justifyContent: expanded ? 'flex-start' : 'center',
+              borderRadius: expanded ? radii.md : 0,
+              border: expanded ? `1px solid ${colors.borderMid}` : 'none',
+              transition: `background ${micro}`,
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = colors.stone2}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <div style={{ flexShrink: 0, display: 'flex', width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="user-plus" size={expanded ? 15 : 20} color={colors.textSecondary} strokeWidth={1.5} />
             </div>
-          )}
-        </button>
+            {expanded && <span style={{ fontSize: 13, color: colors.ink, fontWeight: 500, whiteSpace: 'nowrap' }}>Invite team members</span>}
+          </button>
+        </div>
       </div>
     </div>
   )
 }
 
-const Header = ({ pageTitle, breadcrumbs = [], onShare }) => (
+const Header = ({
+  pageTitle,
+  breadcrumbs = [],
+  onShare,
+  user = { initials: 'AD', name: 'Alain Dunphy', role: 'Admin' },
+}) => (
   <div style={{
     height: 60,
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -231,12 +230,12 @@ const Header = ({ pageTitle, breadcrumbs = [], onShare }) => (
     background: colors.stone,
     position: 'sticky', top: 0, zIndex: 10,
   }}>
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
       {pageTitle && (
         <span style={{
           fontFamily: fontFamilies.display,
           fontWeight: 600,
-          fontSize: 18,
+          fontSize: 20,
           letterSpacing: '-0.3px',
           color: colors.ink,
           lineHeight: 1.2,
@@ -248,7 +247,7 @@ const Header = ({ pageTitle, breadcrumbs = [], onShare }) => (
         <nav aria-label="Breadcrumb">
           <span style={{
             fontFamily: fontFamilies.body,
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: 400,
             color: colors.textTertiary,
             display: 'flex', alignItems: 'center', gap: 3,
@@ -264,9 +263,40 @@ const Header = ({ pageTitle, breadcrumbs = [], onShare }) => (
         </nav>
       )}
     </div>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <Button variant="stone" size="sm" icon="sparkles">Ask AI</Button>
+
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <Button variant="secondary" size="sm" icon="share-2" onClick={onShare}>Share</Button>
+
+      <button
+        aria-label="Notifications"
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: 34, height: 34, borderRadius: radii.md,
+          background: 'transparent', border: `1px solid ${colors.borderMid}`, cursor: 'pointer',
+          transition: `all ${micro}`,
+        }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = colors.borderStrong; e.currentTarget.style.background = colors.stone2 }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = colors.borderMid; e.currentTarget.style.background = 'transparent' }}>
+        <Icon name="bell" size={16} color={colors.ink} strokeWidth={1.5} />
+      </button>
+
+      <Button variant="stone" size="sm" icon="sparkles">Ask AI</Button>
+
+      <button
+        aria-label={`${user.name} – profile`}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: 32, height: 32, borderRadius: '50%',
+          background: colors.ink, color: colors.stone,
+          fontSize: 11, fontWeight: 500,
+          border: 'none', cursor: 'pointer',
+          transition: `opacity ${micro}`,
+          flexShrink: 0,
+        }}
+        onMouseEnter={e => e.currentTarget.style.opacity = '0.82'}
+        onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+        {user.initials}
+      </button>
     </div>
   </div>
 )
