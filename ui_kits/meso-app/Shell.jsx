@@ -135,7 +135,7 @@ const Sidebar = ({ active, onNavigate }) => {
                 onClick={() => setRecordsOpen(o => !o)}
                 style={{ ...btnRow, width: 'auto', flex: 1, gap: 4, padding: '4px 0' }}>
                 <Icon name={recordsOpen ? 'chevron-down' : 'chevron-right'} size={12} color={colors.textTertiary} strokeWidth={2} />
-                <span style={{ fontFamily: fontFamilies.display, fontSize: 12, fontWeight: 600, color: colors.ink, whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: fontFamilies.display, fontSize: 12, fontWeight: 600, color: colors.ink, whiteSpace: 'nowrap', letterSpacing: '-0.2px', textTransform: 'uppercase' }}>
                   Records
                 </span>
               </button>
@@ -154,8 +154,8 @@ const Sidebar = ({ active, onNavigate }) => {
             </div>
           ) : (
             <div style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontFamily: fontFamilies.body, fontSize: 9, fontWeight: 500, color: colors.textTertiary, letterSpacing: '0.2px' }}>
-                Records
+              <span style={{ fontFamily: fontFamilies.display, fontSize: 12, fontWeight: 600, color: colors.ink, letterSpacing: '-0.2px', textTransform: 'uppercase' }}>
+                Rec
               </span>
             </div>
           )}
