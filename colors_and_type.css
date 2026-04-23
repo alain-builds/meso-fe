@@ -14,6 +14,7 @@
   --white:          #FFFFFF;     /* card surface only */
   --ink:            #141412;     /* brand + primary text + dark surface */
   --ink-soft:       #1E1D1B;     /* toasts, dark card surface */
+  --white-dim:      rgba(255, 255, 255, 0.38); /* muted text/labels on ink surfaces */
 
   /* Text hierarchy */
   --text-primary:   #141412;

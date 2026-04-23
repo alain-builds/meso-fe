@@ -171,6 +171,134 @@ Dark mode is handled automatically by `colors_and_type.css` via `prefers-color-s
 
 ---
 
+## Component patterns
+
+### Centering an icon inside a button with surrounding padding
+
+When a button collapses to icon-only, **never remove the container padding to achieve centering**. Keep the padding and change `justifyContent` on the button instead:
+
+```tsx
+// BAD — removes padding to force alignment; button bleeds to the edge
+<div style={{ padding: expanded ? `${spacing.m} ${spacing.s}` : `${spacing.m} 0` }}>
+  <button style={{ justifyContent: 'space-between' }}>…</button>
+</div>
+
+// GOOD — padding always present; button centres its own content when collapsed
+<div style={{ padding: `${spacing.m} ${spacing.s}` }}>
+  <button style={{ justifyContent: expanded ? 'space-between' : 'center' }}>…</button>
+</div>
+```
+
+This applies anywhere a button toggles between a labelled and icon-only state.
+
+---
+
+### Shared dimension constants
+Values derived from layout constraints (e.g. sidebar width, chrome height) often don't map to the spacing scale. Extract them as named constants at the top of the file rather than repeating the literal across components:
+
+```ts
+const CHROME_HEIGHT = 60  // shared by logo strip and page header
+const NAV_PAD_X     = 20  // centers a 20px icon in the 60px collapsed sidebar
+```
+
+### Module-scope constants and component props
+Never pass a module-scope constant as a component prop under the same name — the prop shadows the module binding inside the component, and callers that omit the prop silently receive `undefined`.
+
+```ts
+// BAD — micro prop shadows the module constant; callers that omit it break silently
+const micro = `${duration.micro} ${easing.out}`
+const NavItem = ({ micro }) => <button style={{ transition: `background ${micro}` }} />
+
+// GOOD — reference the module constant directly; it's already in scope
+const NavItem = () => <button style={{ transition: `background ${micro}` }} />
+```
+
+### Data arrays
+Use object form for all data lists — never array-of-arrays (positional tuples). Objects are self-documenting and consistent with every other list pattern in the codebase:
+
+```ts
+// BAD
+[['settings', 'Settings'], ['info', 'Support']].map(([icon, label]) => …)
+
+// GOOD
+const BOTTOM_NAV = [{ icon: 'settings', label: 'Settings' }, { icon: 'info', label: 'Support' }]
+BOTTOM_NAV.map(({ icon, label }) => …)
+```
+
+### Default props
+Never use real user data as a prop default. Use a clearly generic placeholder so a missing prop renders obviously wrong, not subtly wrong:
+
+```ts
+// BAD — renders silently with a real person's name if prop is omitted
+user = { initials: 'AD', name: 'Alain Dunphy', role: 'Admin' }
+
+// GOOD
+user = { initials: 'U', name: 'User', role: 'Member' }
+```
+
+### Navigation landmarks
+Every visually distinct navigation region needs a semantic `<nav>` with an `aria-label`. Main nav and utility/account nav are separate landmarks:
+
+```tsx
+<nav aria-label="Account">…Settings, Support, Invite…</nav>
+```
+
+### React.memo on list items
+Wrap nav/list item components in `React.memo` when their parent re-renders on UI state (e.g. sidebar expand on hover). Nine re-renders on every mouse-enter/leave is avoidable overhead:
+
+```ts
+const NavItem = memo(({ item, isActive, … }) => …)
+NavItem.displayName = 'NavItem'
+```
+
+### Distinct icons for distinct actions
+Never use the same icon for two different actions visible in the same layout. The global Settings nav item and a section-level settings action both used `settings` — use a contextually distinct icon (e.g. `ellipsis`) for the section-level action.
+
+### Icon alignment with a surrounding container margin
+
+When a button sits inside a container that has horizontal padding, the icon position shifts relative to sibling elements that have no such container. Account for the container margin in the button's own horizontal padding:
+
+```ts
+// Container adds 8px (spacing.s) on each side.
+// To keep the icon at x=30 (same as nav items at paddingLeft=20):
+// button paddingLeft = NAV_PAD_X − container_margin = 20 − 8 = 12
+const SEARCH_PAD_X = 12  // NAV_PAD_X minus the 8px container margin
+```
+
+Use symmetric padding and `justifyContent: 'space-between'` — no conditional `justifyContent` needed. A single flex child naturally aligns to the start of the content area, so collapsed and expanded states land at the same x position.
+
+### Prevent layout jump between toggle states
+
+When a section has two render states (e.g. collapsed vs expanded sidebar label), always use a shared fixed-height constant for the container in both branches. Mismatched heights cause a visible vertical jump during the width transition:
+
+```tsx
+const RECORDS_HEADER_H = 28
+
+// collapsed
+<div style={{ height: RECORDS_HEADER_H, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+  <span>Rec</span>
+</div>
+
+// expanded
+<div style={{ height: RECORDS_HEADER_H, display: 'flex', alignItems: 'center', … }}>
+  …full header content…
+</div>
+```
+
+### Token gaps belong in the token files, not in components
+
+When a value has no token and a local constant is the only option, that is a signal to add the token to the design system — not to leave the constant in the component indefinitely. Add the value to `colors_and_type.css`, `tokens/colors.ts` (`colors` and `colorVars`), then reference it through the token import:
+
+```ts
+// BAD — local constant papers over a missing token
+const WHITE_DIM = 'rgba(255,255,255,0.38)'
+
+// GOOD — token added to the system and imported normally
+colors.whiteDim  // backed by --white-dim in colors_and_type.css
+```
+
+---
+
 ## What not to do
 
 - Never hardcode `#1A6B5C`, `#F4F3F0`, or any other token value directly in component code.
@@ -181,3 +309,8 @@ Dark mode is handled automatically by `colors_and_type.css` via `prefers-color-s
 - Never use Funnel Display below 18px.
 - Never use a linear or bouncy animation easing.
 - Never add an emoji.
+- Never use raw `px` font size literals in inline styles — always reference `typeScale.*`.
+- Never use array-of-arrays for component data lists.
+- Never use real user data in default prop values.
+- Never use the same icon for two different scoped actions in the same layout.
+- Never use a list index as a React `key` when the item string itself is unique.

@@ -7,6 +7,7 @@ export const colors = {
   white:        '#FFFFFF',
   ink:          '#141412',
   inkSoft:      '#1E1D1B',
+  whiteDim:     'rgba(255, 255, 255, 0.38)', // muted text/labels on ink surfaces
 
   // Text hierarchy
   textPrimary:   '#141412',
@@ -59,6 +60,7 @@ export const colorVars = {
   white:         'var(--white)',
   ink:           'var(--ink)',
   inkSoft:       'var(--ink-soft)',
+  whiteDim:      'var(--white-dim)',
   textPrimary:   'var(--text-primary)',
   textSecondary: 'var(--text-secondary)',
   textTertiary:  'var(--text-tertiary)',

@@ -1,23 +1,40 @@
-import { useState } from 'react'
-import { colors, duration, easing, radii, fontFamilies } from '@/tokens'
+import { memo, useState } from 'react'
+import { colors, duration, easing, radii, fontFamilies, typeScale, spacing } from '@/tokens'
 import { Icon, Button } from './Components'
 
+// Dimension constants that don't map to the spacing scale — derived from the
+// collapsed sidebar width (60px) which centers a 20px icon with 20px padding each side.
+const SIDEBAR_COLLAPSED  = 60
+const SIDEBAR_EXPANDED   = 200
+const CHROME_HEIGHT      = 60   // shared by the logo strip and page header
+const NAV_PAD_X          = 20   // horizontal padding; centers icon in collapsed sidebar
+const NAV_INDENT_SUB     = 32   // left indent for sub-items when expanded
+const LOGO_WORDMARK_SIZE = '22px'
+// NAV_PAD_X minus the 8px container margin — keeps the search icon at x=30 in both states
+const SEARCH_PAD_X       = 12
+const RECORDS_HEADER_H   = 28   // fixed height shared by collapsed and expanded Records header
+
 const TOP_NAV = [
-  { id: 'canvas',    icon: 'layout-grid',  label: 'Canvas'    },
-  { id: 'strategy',  icon: 'arrow-up-right', label: 'Strategy' },
-  { id: 'analytics', icon: 'bar-chart',    label: 'Analytics' },
+  { id: 'canvas',    icon: 'layout-grid',    label: 'Canvas'    },
+  { id: 'strategy',  icon: 'arrow-up-right', label: 'Strategy'  },
+  { id: 'analytics', icon: 'bar-chart',      label: 'Analytics' },
+]
+
+const BOTTOM_NAV = [
+  { id: 'settings', icon: 'settings', label: 'Settings' },
+  { id: 'support',  icon: 'info',     label: 'Support'  },
 ]
 
 const RECORDS_ITEMS = [
-  { id: 'people',            icon: 'users',       label: 'People'            },
-  { id: 'roles',             icon: 'id-card',     label: 'Roles'             },
-  { id: 'teams',             icon: 'users-round', label: 'Teams'             },
-  { id: 'services',          icon: 'network',     label: 'Services'          },
-  { id: 'processes',         icon: 'workflow',    label: 'Processes'         },
-  { id: 'governance-bodies', icon: 'gavel',       label: 'Governance'        },
+  { id: 'people',            icon: 'users',       label: 'People'     },
+  { id: 'roles',             icon: 'id-card',     label: 'Roles'      },
+  { id: 'teams',             icon: 'users-round', label: 'Teams'      },
+  { id: 'services',          icon: 'network',     label: 'Services'   },
+  { id: 'processes',         icon: 'workflow',    label: 'Processes'  },
+  { id: 'governance-bodies', icon: 'gavel',       label: 'Governance' },
 ]
 
-const btnRow = {
+const baseButtonStyle = {
   display: 'flex', alignItems: 'center',
   background: 'transparent', border: 'none',
   cursor: 'pointer', padding: 0, width: '100%',
@@ -27,20 +44,20 @@ const btnRow = {
 const micro  = `${duration.micro} ${easing.out}`
 const medium = `${duration.medium} ${easing.out}`
 
-const NavItem = ({ item, isActive, onNavigate, expanded, micro, sub = false }) => (
+const NavItem = memo(({ item, isActive, onNavigate, expanded, sub = false }) => (
   <button
     aria-label={item.label}
     aria-current={isActive ? 'page' : undefined}
     onClick={() => onNavigate(item.id)}
     style={{
-      ...btnRow,
-      gap: 14,
-      paddingTop: sub ? 7 : 9,
-      paddingBottom: sub ? 7 : 9,
-      paddingLeft: expanded && sub ? 32 : 20,
-      paddingRight: 20,
-      background: isActive ? colors.tealSoft : 'transparent',
-      transition: `background ${micro}`,
+      ...baseButtonStyle,
+      gap:           spacing.m,
+      paddingTop:    spacing.s,
+      paddingBottom: spacing.s,
+      paddingLeft:   expanded && sub ? `${NAV_INDENT_SUB}px` : `${NAV_PAD_X}px`,
+      paddingRight:  `${NAV_PAD_X}px`,
+      background:    isActive ? colors.tealSoft : 'transparent',
+      transition:    `background ${micro}`,
     }}
     onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = colors.stone }}
     onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
@@ -48,12 +65,13 @@ const NavItem = ({ item, isActive, onNavigate, expanded, micro, sub = false }) =
       <Icon name={item.icon} size={sub ? 16 : 20} color={isActive ? colors.teal : colors.textSecondary} strokeWidth={isActive ? 2 : 1.5} />
     </div>
     {expanded && (
-      <span style={{ fontSize: sub ? 12 : 13, color: isActive ? colors.teal : colors.textSecondary, fontWeight: isActive ? 500 : 400, whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: typeScale.ui.size, color: isActive ? colors.teal : colors.textSecondary, fontWeight: isActive ? 500 : 400, whiteSpace: 'nowrap' }}>
         {item.label}
       </span>
     )}
   </button>
-)
+))
+NavItem.displayName = 'NavItem'
 
 const Sidebar = ({ active, onNavigate }) => {
   const [expanded, setExpanded] = useState(false)
@@ -65,7 +83,7 @@ const Sidebar = ({ active, onNavigate }) => {
       onMouseLeave={() => setExpanded(false)}
       style={{
         position: 'fixed', top: 0, left: 0, bottom: 0,
-        width: expanded ? 200 : 60,
+        width: expanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED,
         background: colors.white,
         borderRight: `1px solid ${colors.border}`,
         transition: `width ${medium}`,
@@ -75,8 +93,8 @@ const Sidebar = ({ active, onNavigate }) => {
 
       {/* Logo */}
       <div style={{
-        height: 60, padding: '0 20px',
-        display: 'flex', alignItems: 'center', gap: 10,
+        height: CHROME_HEIGHT, padding: `0 ${NAV_PAD_X}px`,
+        display: 'flex', alignItems: 'center', gap: spacing.s,
         borderBottom: `1px solid ${colors.border}`, flexShrink: 0,
       }}>
         <svg width="22" height="22" viewBox="0 0 52 52" style={{ flexShrink: 0 }} aria-hidden="true">
@@ -84,32 +102,37 @@ const Sidebar = ({ active, onNavigate }) => {
           <path d="M 6 33 Q 16 23, 26 33 Q 36 43, 46 33" stroke={colors.ink} strokeWidth="5" fill="none" strokeLinecap="butt" strokeLinejoin="round" />
         </svg>
         {expanded && (
-          <span style={{ fontFamily: fontFamilies.display, fontWeight: 600, fontSize: 22, letterSpacing: '-0.8px', color: colors.ink }}>
+          <span style={{ fontFamily: fontFamilies.display, fontWeight: 600, fontSize: LOGO_WORDMARK_SIZE, letterSpacing: typeScale.h2.letterSpacing, color: colors.ink }}>
             meso
           </span>
         )}
       </div>
 
       {/* Search */}
-      <div style={{ padding: '10px 12px', borderBottom: `1px solid ${colors.border}`, flexShrink: 0 }}>
+      <div style={{ padding: `${spacing.m} ${spacing.s}`, borderBottom: `1px solid ${colors.border}`, flexShrink: 0 }}>
         <button
           aria-label="Search (Ctrl+K)"
           style={{
-            ...btnRow,
-            justifyContent: expanded ? 'space-between' : 'center',
-            padding: expanded ? '8px 10px' : '8px',
-            borderRadius: radii.md,
-            background: colors.ink,
-            transition: `opacity ${micro}`,
+            ...baseButtonStyle,
+            justifyContent: 'space-between',
+            paddingTop:    spacing.s,
+            paddingBottom: spacing.s,
+            paddingLeft:   `${SEARCH_PAD_X}px`,
+            paddingRight:  `${SEARCH_PAD_X}px`,
+            borderRadius:  radii.md,
+            background:    colors.ink,
+            transition:    `opacity ${micro}`,
           }}
           onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Icon name="search" size={16} color={colors.white} strokeWidth={1.5} />
-            {expanded && <span style={{ fontSize: 13, fontWeight: 500, color: colors.white, whiteSpace: 'nowrap', lineHeight: '16px' }}>Search</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
+            <div style={{ flexShrink: 0, display: 'flex', width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="search" size={16} color={colors.white} strokeWidth={1.5} />
+            </div>
+            {expanded && <span style={{ fontSize: typeScale.ui.size, fontWeight: 500, color: colors.white, whiteSpace: 'nowrap', lineHeight: 1 }}>Search</span>}
           </div>
           {expanded && (
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap', letterSpacing: '0.2px', fontFamily: fontFamilies.body }}>
+            <span style={{ fontSize: typeScale.labelB.size, color: colors.whiteDim, whiteSpace: 'nowrap', letterSpacing: '0.2px', fontFamily: fontFamilies.body }}>
               Ctrl K
             </span>
           )}
@@ -117,30 +140,30 @@ const Sidebar = ({ active, onNavigate }) => {
       </div>
 
       {/* Main nav */}
-      <nav style={{ padding: '12px 0', flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+      <nav style={{ padding: `${spacing.s} 0`, flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {TOP_NAV.map(it => (
-          <NavItem key={it.id} item={it} isActive={active === it.id} onNavigate={onNavigate} expanded={expanded} micro={micro} />
+          <NavItem key={it.id} item={it} isActive={active === it.id} onNavigate={onNavigate} expanded={expanded} />
         ))}
 
         {/* Section divider */}
-        <div style={{ height: 1, background: colors.border, margin: '8px 0' }} />
+        <div style={{ height: 1, background: colors.border, margin: `${spacing.s} 0` }} />
 
         {/* Records group */}
         <div>
           {expanded ? (
-            <div style={{ display: 'flex', alignItems: 'center', padding: '2px 8px 2px 14px', gap: 4 }}>
+            <div style={{ height: RECORDS_HEADER_H, display: 'flex', alignItems: 'center', paddingLeft: spacing.m, paddingRight: spacing.s, gap: spacing.xs }}>
               <button
                 aria-label="Toggle Records"
                 aria-expanded={recordsOpen}
                 onClick={() => setRecordsOpen(o => !o)}
-                style={{ ...btnRow, width: 'auto', flex: 1, gap: 4, padding: '4px 0' }}>
+                style={{ ...baseButtonStyle, width: 'auto', flex: 1, gap: spacing.xs }}>
                 <Icon name={recordsOpen ? 'chevron-down' : 'chevron-right'} size={12} color={colors.textTertiary} strokeWidth={2} />
-                <span style={{ fontFamily: fontFamilies.display, fontSize: 12, fontWeight: 600, color: colors.ink, whiteSpace: 'nowrap', letterSpacing: '-0.2px', textTransform: 'uppercase' }}>
+                <span style={{ fontFamily: fontFamilies.body, fontSize: typeScale.labelB.size, fontWeight: 600, color: colors.ink, whiteSpace: 'nowrap' }}>
                   Records
                 </span>
               </button>
               <button
-                aria-label="Section settings"
+                aria-label="Records section options"
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   width: 22, height: 22, borderRadius: radii.sm,
@@ -149,12 +172,12 @@ const Sidebar = ({ active, onNavigate }) => {
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = colors.stone}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <Icon name="settings" size={13} color={colors.textTertiary} strokeWidth={1.5} />
+                <Icon name="pencil" size={13} color={colors.textSecondary} strokeWidth={1.5} />
               </button>
             </div>
           ) : (
-            <div style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontFamily: fontFamilies.display, fontSize: 12, fontWeight: 600, color: colors.ink, letterSpacing: '-0.2px', textTransform: 'uppercase' }}>
+            <div style={{ height: RECORDS_HEADER_H, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontFamily: fontFamilies.body, fontSize: typeScale.labelB.size, fontWeight: 600, color: colors.ink }}>
                 Rec
               </span>
             </div>
@@ -167,51 +190,43 @@ const Sidebar = ({ active, onNavigate }) => {
               isActive={active === it.id}
               onNavigate={onNavigate}
               expanded={expanded}
-              micro={micro}
+              sub
             />
           ))}
         </div>
       </nav>
 
-      {/* Bottom: Settings → Support → Invite team members */}
-      <div style={{ borderTop: `1px solid ${colors.border}`, flexShrink: 0 }}>
-        <div style={{ padding: '8px 0' }}>
-          {[['settings', 'Settings'], ['info', 'Support']].map(([icon, label]) => (
+      {/* Settings + Support + Invite */}
+      <nav aria-label="Account" style={{ borderTop: `1px solid ${colors.border}`, flexShrink: 0 }}>
+        <div style={{ padding: `${spacing.s} 0` }}>
+          {BOTTOM_NAV.map(({ id, icon, label }) => (
             <button
-              key={label}
+              key={id}
               aria-label={label}
-              style={{ ...btnRow, gap: 14, padding: '9px 20px', transition: `background ${micro}` }}
+              style={{ ...baseButtonStyle, gap: spacing.m, padding: `${spacing.s} ${NAV_PAD_X}px`, transition: `background ${micro}` }}
               onMouseEnter={e => e.currentTarget.style.background = colors.stone}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
               <div style={{ flexShrink: 0, display: 'flex', width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
                 <Icon name={icon} size={20} color={colors.textSecondary} strokeWidth={1.5} />
               </div>
-              {expanded && <span style={{ fontSize: 13, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{label}</span>}
+              {expanded && <span style={{ fontSize: typeScale.ui.size, color: colors.textSecondary, whiteSpace: 'nowrap' }}>{label}</span>}
             </button>
           ))}
         </div>
 
-        <div style={{ borderTop: `1px solid ${colors.border}`, padding: expanded ? '8px 12px 12px' : '8px 0 12px' }}>
+        <div style={{ borderTop: `1px solid ${colors.border}`, padding: `${spacing.s} 0` }}>
           <button
             aria-label="Invite team members"
-            style={{
-              ...btnRow,
-              gap: 8,
-              padding: expanded ? '7px 10px' : '9px 20px',
-              justifyContent: expanded ? 'flex-start' : 'center',
-              borderRadius: expanded ? radii.md : 0,
-              border: expanded ? `1px solid ${colors.borderMid}` : 'none',
-              transition: `background ${micro}`,
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = colors.stone2}
+            style={{ ...baseButtonStyle, gap: spacing.m, padding: `${spacing.s} ${NAV_PAD_X}px`, transition: `background ${micro}` }}
+            onMouseEnter={e => e.currentTarget.style.background = colors.stone}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
             <div style={{ flexShrink: 0, display: 'flex', width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="user-plus" size={expanded ? 15 : 20} color={colors.textSecondary} strokeWidth={1.5} />
+              <Icon name="user-plus" size={20} color={colors.textSecondary} strokeWidth={1.5} />
             </div>
-            {expanded && <span style={{ fontSize: 13, color: colors.ink, fontWeight: 500, whiteSpace: 'nowrap' }}>Invite team members</span>}
+            {expanded && <span style={{ fontSize: typeScale.ui.size, color: colors.ink, fontWeight: 500, whiteSpace: 'nowrap' }}>Invite team members</span>}
           </button>
         </div>
-      </div>
+      </nav>
     </div>
   )
 }
@@ -220,25 +235,25 @@ const Header = ({
   pageTitle,
   breadcrumbs = [],
   onShare,
-  user = { initials: 'AD', name: 'Alain Dunphy', role: 'Admin' },
+  user = { initials: 'U', name: 'User', role: 'Member' },
 }) => (
   <div style={{
-    height: 60,
+    height: CHROME_HEIGHT,
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '0 40px',
+    padding: `0 ${spacing.xl}`,
     borderBottom: `1px solid ${colors.border}`,
     background: colors.stone,
     position: 'sticky', top: 0, zIndex: 10,
   }}>
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: spacing.m }}>
       {pageTitle && (
         <span style={{
-          fontFamily: fontFamilies.display,
-          fontWeight: 600,
-          fontSize: 20,
-          letterSpacing: '-0.3px',
-          color: colors.ink,
-          lineHeight: 1.2,
+          fontFamily:    fontFamilies.display,
+          fontWeight:    typeScale.h3.weight,
+          fontSize:      typeScale.h3.size,
+          letterSpacing: typeScale.h3.letterSpacing,
+          color:         colors.ink,
+          lineHeight:    typeScale.h3.lineHeight,
         }}>
           {pageTitle}
         </span>
@@ -247,16 +262,26 @@ const Header = ({
         <nav aria-label="Breadcrumb">
           <span style={{
             fontFamily: fontFamilies.body,
-            fontSize: 13,
+            fontSize:   typeScale.ui.size,
             fontWeight: 400,
-            color: colors.textTertiary,
-            display: 'flex', alignItems: 'center', gap: 3,
+            color:      colors.textTertiary,
+            display: 'flex', alignItems: 'center', gap: spacing.s,
             lineHeight: 1,
           }}>
             {breadcrumbs.map((crumb, i) => (
-              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
                 {i > 0 && <span style={{ color: colors.borderMid }}>›</span>}
-                <span>{crumb}</span>
+                <button
+                  style={{
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    fontFamily: fontFamilies.body, fontSize: typeScale.ui.size,
+                    fontWeight: 400, color: colors.textTertiary, padding: 0,
+                    transition: `color ${micro}`,
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = colors.textSecondary}
+                  onMouseLeave={e => e.currentTarget.style.color = colors.textTertiary}>
+                  {crumb}
+                </button>
               </span>
             ))}
           </span>
@@ -264,7 +289,7 @@ const Header = ({
       )}
     </div>
 
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
       <Button variant="secondary" size="sm" icon="share-2" onClick={onShare}>Share</Button>
 
       <button
@@ -288,7 +313,7 @@ const Header = ({
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           width: 32, height: 32, borderRadius: '50%',
           background: colors.ink, color: colors.stone,
-          fontSize: 11, fontWeight: 500,
+          fontSize: typeScale.labelB.size, fontWeight: 500,
           border: 'none', cursor: 'pointer',
           transition: `opacity ${micro}`,
           flexShrink: 0,
