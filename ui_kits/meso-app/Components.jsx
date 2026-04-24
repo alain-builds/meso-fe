@@ -15,6 +15,8 @@ const Icon = ({ name, size = 20, color = 'currentColor', strokeWidth = 1.5, styl
     'bell':             <><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></>,
     'plus':             <><path d="M5 12h14"/><path d="M12 5v14"/></>,
     'chevron-left':     <><path d="m15 18-6-6 6-6"/></>,
+    'star':             <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></>,
+    'star-filled':      <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor"/></>,
     'chevron-right':    <><path d="m9 18 6-6-6-6"/></>,
     'chevron-down':     <><path d="m6 9 6 6 6-6"/></>,
     'more-horizontal':  <><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></>,
