@@ -38,6 +38,10 @@ const ROLES = [
     priorHolders: [
       { id: 'ph1', name: "James O'Brien", period: 'Jan 2022 – Mar 2023' },
     ],
+    createdAt: 'Jan 10, 2021',
+    createdBy: 'Daniel Riemann',
+    updatedAt: 'Mar 3, 2025',
+    updatedBy: 'Sarah van der Berg',
   },
   {
     id: 'r2',
@@ -70,6 +74,10 @@ const ROLES = [
     okrsOnTrack:      1,
     governanceSeats:  1,
     priorHolders: [],
+    createdAt: 'Apr 5, 2021',
+    createdBy: 'Sarah van der Berg',
+    updatedAt: 'Jan 15, 2025',
+    updatedBy: 'Katarina Novak',
   },
   {
     id: 'r3',
@@ -102,6 +110,10 @@ const ROLES = [
     priorHolders: [
       { id: 'ph1', name: 'Fatima Al-Rashid', period: 'Sep 2021 – Oct 2024' },
     ],
+    createdAt: 'Sep 1, 2021',
+    createdBy: 'Daniel Riemann',
+    updatedAt: 'Nov 4, 2024',
+    updatedBy: 'Ana Petrova',
   },
 ]
 
@@ -128,12 +140,16 @@ const DEFAULT_ROLE = {
   okrsOnTrack:      0,
   governanceSeats:  0,
   priorHolders:    [],
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
 }
 
 const getRole = (role) =>
   ROLES.find(r => r.roleName === role.name || r.id === role.id) ?? { ...DEFAULT_ROLE, roleName: role.name }
 
-const RoleDetail = ({ role, onBack }) => {
+const RoleDetail = ({ role, onTitleVisibilityChange }) => {
   const detail = getRole(role)
 
   const statTiles = [
@@ -191,10 +207,13 @@ const RoleDetail = ({ role, onBack }) => {
       nodeSubtype={detail.masterRoleLabel !== detail.roleName ? detail.masterRoleLabel : undefined}
       name={detail.roleName}
       status={detail.isVacant ? 'draft' : 'active'}
-      breadcrumb={[detail.domain, detail.teamName].filter(s => s && s !== '—')}
+      createdAt={detail.createdAt}
+      createdBy={detail.createdBy}
+      updatedAt={detail.updatedAt}
+      updatedBy={detail.updatedBy}
       statTiles={statTiles}
       tabs={tabs}
-      onBack={onBack}
+      onTitleVisibilityChange={onTitleVisibilityChange}
     />
   )
 }

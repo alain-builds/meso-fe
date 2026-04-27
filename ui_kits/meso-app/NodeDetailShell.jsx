@@ -7,10 +7,10 @@ import { RelationshipMapSlot } from './RelationshipMapSlot'
 const CHROME_HEIGHT = 60
 
 const STATUS_CONFIG = {
-  active:   { variant: 'teal',    dot: 'live', label: 'Active'   },
-  archived: { variant: 'neutral', dot: 'off',  label: 'Archived' },
-  draft:    { variant: 'neutral', dot: 'warn', label: 'Draft'    },
-  pipeline: { variant: 'outline', dot: null,   label: 'Pipeline' },
+  active:   { variant: 'teal',    dot: 'live', label: 'Active',   pill: { background: colors.tealSoft, color: colors.teal          }, dotColor: colors.teal          },
+  archived: { variant: 'neutral', dot: 'off',  label: 'Archived', pill: { background: colors.stone2,  color: colors.textSecondary  }, dotColor: colors.textTertiary  },
+  draft:    { variant: 'neutral', dot: 'warn', label: 'Draft',    pill: { background: colors.stone2,  color: colors.textSecondary  }, dotColor: '#F59E0B'             },
+  pipeline: { variant: 'outline', dot: null,   label: 'Pipeline', pill: { background: 'transparent',  color: colors.textTertiary, border: `1px solid ${colors.borderMid}` }, dotColor: null },
 }
 
 const SIDE_TABS = [
@@ -359,22 +359,38 @@ const NodeDetailShell = ({
   nodeSubtype,
   name,
   status = 'active',
-  breadcrumb = [],
+  createdAt,
+  createdBy,
+  updatedAt,
+  updatedBy,
   statTiles = [],
   sidebarContent,
   tabs = [],
-  onBack,
+  onTitleVisibilityChange,
 }) => {
   const [activeTab,     setActiveTab]     = useState(tabs[0]?.id ?? null)
   const [activeSideTab, setActiveSideTab] = useState('details')
   const [starred,       setStarred]       = useState(false)
+  const titleRef = useRef(null)
+
+  useEffect(() => {
+    if (!onTitleVisibilityChange) return
+    const el = titleRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => onTitleVisibilityChange(entry.isIntersecting),
+      { rootMargin: `-${CHROME_HEIGHT}px 0px 0px 0px` }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [onTitleVisibilityChange])
 
   const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.active
   const activeContent = tabs.find(t => t.id === activeTab)?.content ?? null
 
   return (
     <div style={{
-      paddingTop:    '10px',
+      paddingTop:    spacing.m,
       paddingLeft:   spacing.xl2,
       paddingRight:  spacing.xl2,
       paddingBottom: spacing.xl3,
@@ -382,37 +398,25 @@ const NodeDetailShell = ({
       boxSizing: 'border-box',
     }}>
 
-      {/* Header bar — back + title + actions on one line */}
+      {/* Header bar — title + actions on one line */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: spacing.m,
-        marginBottom: spacing.m,
+        display: 'flex', alignItems: 'flex-start', gap: spacing.m,
+        marginBottom: spacing.s,
       }}>
-        <button
-          onClick={onBack}
-          style={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
-            color: colors.textSecondary, flexShrink: 0,
-            transition: `color ${micro}`,
-          }}
-          onMouseEnter={e => e.currentTarget.style.color = colors.ink}
-          onMouseLeave={e => e.currentTarget.style.color = colors.textSecondary}
-          aria-label="Go back"
-        >
-          <Icon name="chevron-left" size={20} strokeWidth={2} />
-        </button>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: spacing.s, flex: 1, minWidth: 0 }}>
-          <h1 style={{
-            fontFamily:    fontFamilies.display,
-            fontSize:      typeScale.h1.size,
-            fontWeight:    typeScale.h1.weight,
-            letterSpacing: typeScale.h1.letterSpacing,
-            lineHeight:    typeScale.h1.lineHeight,
-            color:         colors.ink,
-            margin:        0,
-            minWidth:      0,
-          }}>
+          <h1
+            ref={titleRef}
+            style={{
+              fontFamily:    fontFamilies.display,
+              fontSize:      '34px',
+              fontWeight:    700,
+              letterSpacing: '-1px',
+              lineHeight:    1.1,
+              color:         colors.ink,
+              margin:        0,
+              minWidth:      0,
+            }}
+          >
             {name}
           </h1>
 
@@ -430,6 +434,7 @@ const NodeDetailShell = ({
           >
             <Icon name={starred ? 'star-filled' : 'star'} size={18} strokeWidth={1.5} />
           </button>
+
         </div>
 
         <div style={{ display: 'flex', gap: spacing.s, flexShrink: 0 }}>
@@ -439,16 +444,32 @@ const NodeDetailShell = ({
         </div>
       </div>
 
-      {/* Status + breadcrumb pills */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: spacing.s, flexWrap: 'wrap', marginBottom: spacing.l }}>
-        {statusCfg.dot
-          ? <Pill variant={statusCfg.variant} dot={statusCfg.dot}>{statusCfg.label}</Pill>
-          : <Pill variant={statusCfg.variant}>{statusCfg.label}</Pill>
-        }
-        {breadcrumb.map(crumb => (
-          <Pill key={crumb} variant="outline">{crumb}</Pill>
-        ))}
-      </div>
+      {/* Timestamps — status pill + single date line */}
+      {(updatedAt || createdAt) && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: spacing.s,
+          marginBottom: spacing.m,
+          fontFamily:   fontFamilies.body,
+          fontSize:     typeScale.labelB.size,
+          color:        colors.textTertiary,
+        }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            padding: '1px 6px', borderRadius: radii.sm, flexShrink: 0,
+            fontSize: '10px', fontWeight: 500,
+            ...statusCfg.pill,
+          }}>
+            {statusCfg.dot && (
+              <span style={{ width: 4, height: 4, borderRadius: '50%', flexShrink: 0, background: statusCfg.dotColor }} />
+            )}
+            {statusCfg.label}
+          </span>
+          {updatedAt
+            ? <span>Last updated {updatedAt}{updatedBy ? ` by ${updatedBy}` : ''}</span>
+            : <span>Created {createdAt}{createdBy ? ` by ${createdBy}` : ''}</span>
+          }
+        </div>
+      )}
 
       {/* Two-column body */}
       <div style={{ display: 'flex', gap: spacing.l, alignItems: 'flex-start' }}>

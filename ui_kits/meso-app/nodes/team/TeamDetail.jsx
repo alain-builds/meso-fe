@@ -52,6 +52,10 @@ const DEFAULTS = {
     { id: 'm9', name: '',                   role: 'Senior Engineer',       isVacant: true,  isExternal: false },
     { id: 'm10',name: '',                   role: 'On-call escalation',    isVacant: true,  isExternal: false },
   ],
+  createdAt: 'Mar 12, 2022',
+  createdBy: 'Sarah van der Berg',
+  updatedAt: 'Apr 14, 2025',
+  updatedBy: 'Thomas Weber',
 }
 
 const TEAM_DETAILS = {
@@ -73,6 +77,10 @@ const TEAM_DETAILS = {
     directInternalMemberCount: 3, directExternalMemberCount: 1,
     servicesProvided: 8, servicesConsumed: 3,
     okrHealth: 60,
+    createdAt: 'Jun 8, 2022',
+    createdBy: 'Marco Lehmann',
+    updatedAt: 'Feb 27, 2025',
+    updatedBy: 'Marco Lehmann',
   },
   t3: {
     ...DEFAULTS,
@@ -91,6 +99,10 @@ const TEAM_DETAILS = {
     directInternalMemberCount: 2, directExternalMemberCount: 1,
     servicesProvided: 5, servicesConsumed: 8,
     okrHealth: 50,
+    createdAt: 'Oct 3, 2023',
+    createdBy: 'Daniel Riemann',
+    updatedAt: 'Mar 19, 2025',
+    updatedBy: 'Omar Aziz',
   },
 }
 
@@ -102,7 +114,7 @@ const mapStatus = (s) => {
   return 'active'
 }
 
-const TeamDetail = ({ team, onBack, onRemove }) => {
+const TeamDetail = ({ team, onRemove, onTitleVisibilityChange }) => {
   const detail      = getDetail(team)
   const vacancyCount = detail.members.filter(m => m.isVacant).length
 
@@ -164,10 +176,13 @@ const TeamDetail = ({ team, onBack, onRemove }) => {
       nodeSubtype={detail.teamType}
       name={team.name}
       status={mapStatus(team.status)}
-      breadcrumb={[detail.domain]}
+      createdAt={detail.createdAt}
+      createdBy={detail.createdBy}
+      updatedAt={detail.updatedAt}
+      updatedBy={detail.updatedBy}
       statTiles={statTiles}
       tabs={tabs}
-      onBack={onBack}
+      onTitleVisibilityChange={onTitleVisibilityChange}
     />
   )
 }

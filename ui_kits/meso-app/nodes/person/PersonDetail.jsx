@@ -38,6 +38,10 @@ const PEOPLE = [
       { id: 'c1', name: 'Engineering Leadership CoP', domain: 'Engineering', isLead: true },
       { id: 'c2', name: 'Women in Tech ERG',           domain: 'People',      isLead: false },
     ],
+    createdAt: 'Feb 3, 2021',
+    createdBy: 'HR Admin',
+    updatedAt: 'Jan 20, 2025',
+    updatedBy: 'Sarah van der Berg',
   },
   {
     id: 'p2',
@@ -68,6 +72,10 @@ const PEOPLE = [
     communities: [
       { id: 'c3', name: 'Data Guild', domain: 'Data', isLead: false },
     ],
+    createdAt: 'May 16, 2022',
+    createdBy: 'HR Admin',
+    updatedAt: 'Dec 9, 2024',
+    updatedBy: 'Marco Lehmann',
   },
 ]
 
@@ -94,12 +102,16 @@ const DEFAULT_PERSON = {
   positions: [],
   teams: [],
   communities: [],
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
 }
 
 const getPerson = (person) =>
   PEOPLE.find(p => p.name === person.name) ?? { ...DEFAULT_PERSON, ...person }
 
-const PersonDetail = ({ person, onBack }) => {
+const PersonDetail = ({ person, onTitleVisibilityChange }) => {
   const detail = getPerson(person)
 
   const statTiles = [
@@ -155,10 +167,13 @@ const PersonDetail = ({ person, onBack }) => {
       nodeSubtype={detail.isExternal ? 'external' : detail.personType}
       name={detail.name}
       status="active"
-      breadcrumb={[detail.location].filter(Boolean)}
+      createdAt={detail.createdAt}
+      createdBy={detail.createdBy}
+      updatedAt={detail.updatedAt}
+      updatedBy={detail.updatedBy}
       statTiles={statTiles}
       tabs={tabs}
-      onBack={onBack}
+      onTitleVisibilityChange={onTitleVisibilityChange}
     />
   )
 }

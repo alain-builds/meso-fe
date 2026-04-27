@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import { colors, fontFamilies, typeScale, spacing } from '@/tokens'
 import '../../colors_and_type.css'
@@ -127,21 +127,31 @@ function EmptyPanel({ label }) {
 
 const RECORD_IDS = new Set(['people', 'roles', 'teams', 'services', 'processes', 'governance-bodies'])
 
-function getPageInfo(active, openNode) {
+function buildBreadcrumbs(active, openNode, closeNode) {
   const label = active.charAt(0).toUpperCase() + active.slice(1).replace(/-/g, ' ')
-  if (openNode) return { pageTitle: label, breadcrumbs: ['Records', label, openNode.name ?? openNode.roleName] }
-  if (RECORD_IDS.has(active)) return { pageTitle: label, breadcrumbs: ['Records', label] }
-  return { pageTitle: label, breadcrumbs: [] }
+  if (openNode) return [
+    { label: 'Records',                           onClick: null      },
+    { label: label,                               onClick: closeNode },
+    { label: openNode.name ?? openNode.roleName,  onClick: null      },
+  ]
+  if (RECORD_IDS.has(active)) return [
+    { label: 'Records', onClick: null },
+    { label: label,     onClick: null },
+  ]
+  return []
 }
 
 function App() {
-  const [active,     setActive]     = useState('teams')
-  const [openTeam,   setOpenTeam]   = useState(null)
-  const [openPerson, setOpenPerson] = useState(null)
-  const [openRole,   setOpenRole]   = useState(null)
-  const [modal,      setModal]      = useState(false)
-  const [toast,      setToast]      = useState(null)
-  const [loading,    setLoading]    = useState(true)
+  const [active,       setActive]       = useState('teams')
+  const [openTeam,     setOpenTeam]     = useState(null)
+  const [openPerson,   setOpenPerson]   = useState(null)
+  const [openRole,     setOpenRole]     = useState(null)
+  const [modal,        setModal]        = useState(false)
+  const [toast,        setToast]        = useState(null)
+  const [loading,      setLoading]      = useState(true)
+  const [titleVisible, setTitleVisible] = useState(true)
+
+  const openNode = openTeam ?? openPerson ?? openRole
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 800)
@@ -158,18 +168,25 @@ function App() {
     setOpenTeam(null)
     setOpenPerson(null)
     setOpenRole(null)
+    setTitleVisible(true)
   }
 
-  const openNode = openTeam ?? openPerson ?? openRole
-  const { pageTitle, breadcrumbs } = getPageInfo(active, openNode)
+  const closeNode = useCallback(() => {
+    setOpenTeam(null)
+    setOpenPerson(null)
+    setOpenRole(null)
+    setTitleVisible(true)
+  }, [])
+
+  const breadcrumbs = buildBreadcrumbs(active, openNode, closeNode)
 
   return (
     <div>
       <Sidebar active={active} onNavigate={navigateTo} />
       <div style={{ marginLeft: 60, minHeight: '100vh', background: colors.stone }}>
         <Header
-          pageTitle={pageTitle}
           breadcrumbs={breadcrumbs}
+          boldLastBreadcrumb={!titleVisible}
           onShare={() => showToast('info', 'Link copied to clipboard.')}
         />
         <div key={openNode ? openNode.id : active} className="rise">
@@ -179,7 +196,7 @@ function App() {
             <TeamsScreen onOpenTeam={setOpenTeam} loading={loading} />
           )}
           {active === 'teams' && openTeam && (
-            <TeamDetail team={openTeam} onBack={() => setOpenTeam(null)} onRemove={() => setModal(true)} />
+            <TeamDetail team={openTeam} onRemove={() => setModal(true)} onTitleVisibilityChange={setTitleVisible} />
           )}
 
           {/* People */}
@@ -187,7 +204,7 @@ function App() {
             <PeopleScreen onOpenPerson={setOpenPerson} />
           )}
           {active === 'people' && openPerson && (
-            <PersonDetail person={openPerson} onBack={() => setOpenPerson(null)} />
+            <PersonDetail person={openPerson} onTitleVisibilityChange={setTitleVisible} />
           )}
 
           {/* Roles */}
@@ -195,7 +212,7 @@ function App() {
             <RolesScreen onOpenRole={setOpenRole} />
           )}
           {active === 'roles' && openRole && (
-            <RoleDetail role={openRole} onBack={() => setOpenRole(null)} />
+            <RoleDetail role={openRole} onTitleVisibilityChange={setTitleVisible} />
           )}
 
           {/* Everything else */}

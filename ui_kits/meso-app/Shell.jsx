@@ -231,12 +231,17 @@ const Sidebar = ({ active, onNavigate }) => {
   )
 }
 
+// breadcrumbs: Array<{ label: string, onClick: (() => void) | null }>
+// Last item is the current page (non-clickable). Items with onClick: null render as plain text.
 const Header = ({
-  pageTitle,
   breadcrumbs = [],
+  boldLastBreadcrumb = false,
   onShare,
   user = { initials: 'U', name: 'User', role: 'Member' },
-}) => (
+}) => {
+  const backTarget = breadcrumbs.length > 2 ? breadcrumbs[breadcrumbs.length - 2] : null
+
+  return (
   <div style={{
     height: CHROME_HEIGHT,
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -245,45 +250,72 @@ const Header = ({
     background: colors.stone,
     position: 'sticky', top: 0, zIndex: 10,
   }}>
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: spacing.m }}>
-      {pageTitle && (
-        <span style={{
-          fontFamily:    fontFamilies.display,
-          fontWeight:    typeScale.h3.weight,
-          fontSize:      typeScale.h3.size,
-          letterSpacing: typeScale.h3.letterSpacing,
-          color:         colors.ink,
-          lineHeight:    typeScale.h3.lineHeight,
-        }}>
-          {pageTitle}
-        </span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: spacing.m }}>
+      {backTarget?.onClick && (
+        <button
+          onClick={backTarget.onClick}
+          aria-label="Go back"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 34, height: 34, borderRadius: radii.md,
+            background: 'transparent', border: `1px solid ${colors.borderMid}`,
+            cursor: 'pointer', flexShrink: 0,
+            transition: `all ${micro}`,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = colors.borderStrong; e.currentTarget.style.background = colors.stone2 }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = colors.borderMid; e.currentTarget.style.background = 'transparent' }}
+        >
+          <Icon name="chevron-left" size={16} color={colors.ink} strokeWidth={1.5} />
+        </button>
       )}
       {breadcrumbs.length > 0 && (
         <nav aria-label="Breadcrumb">
           <span style={{
             fontFamily: fontFamilies.body,
             fontSize:   typeScale.ui.size,
-            fontWeight: 400,
-            color:      colors.textTertiary,
-            display: 'flex', alignItems: 'center', gap: spacing.s,
+            display:    'flex', alignItems: 'center', gap: spacing.s,
             lineHeight: 1,
           }}>
-            {breadcrumbs.map((crumb, i) => (
-              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
-                {i > 0 && <span style={{ color: colors.borderMid }}>›</span>}
-                <button
-                  style={{
-                    background: 'transparent', border: 'none', cursor: 'pointer',
-                    fontFamily: fontFamilies.body, fontSize: typeScale.ui.size,
-                    fontWeight: 400, color: colors.textTertiary, padding: 0,
-                    transition: `color ${micro}`,
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.color = colors.textSecondary}
-                  onMouseLeave={e => e.currentTarget.style.color = colors.textTertiary}>
-                  {crumb}
-                </button>
-              </span>
-            ))}
+            {breadcrumbs.map((crumb, i) => {
+              const isLast = i === breadcrumbs.length - 1
+              return (
+                <span key={i} style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
+                  {i > 0 && (
+                    <span style={{ color: colors.textTertiary, userSelect: 'none' }}>/</span>
+                  )}
+                  {isLast ? (
+                    <span style={{
+                      fontFamily:  fontFamilies.body,
+                      fontSize:    typeScale.ui.size,
+                      fontWeight:  boldLastBreadcrumb ? 600 : 400,
+                      color:       colors.ink,
+                    }}>
+                      {crumb.label}
+                    </span>
+                  ) : crumb.onClick ? (
+                    <button
+                      onClick={crumb.onClick}
+                      style={{
+                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        fontFamily: fontFamilies.body, fontSize: typeScale.ui.size,
+                        fontWeight: 400, color: colors.textTertiary, padding: 0,
+                        transition: `color ${micro}`,
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.color = colors.textSecondary}
+                      onMouseLeave={e => e.currentTarget.style.color = colors.textTertiary}>
+                      {crumb.label}
+                    </button>
+                  ) : (
+                    <span style={{
+                      fontFamily: fontFamilies.body, fontSize: typeScale.ui.size,
+                      fontWeight: 400, color: colors.textTertiary,
+                    }}>
+                      {crumb.label}
+                    </span>
+                  )}
+                </span>
+              )
+            })}
           </span>
         </nav>
       )}
@@ -324,6 +356,7 @@ const Header = ({
       </button>
     </div>
   </div>
-)
+  )
+}
 
 export { Sidebar, Header }
