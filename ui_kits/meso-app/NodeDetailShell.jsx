@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { colors, fontFamilies, typeScale, spacing, radii, shadows, duration, easing } from '@/tokens'
 import { Icon, Button, Pill } from './Components'
 import { RelationshipMapSlot } from './RelationshipMapSlot'
@@ -125,6 +125,235 @@ const CollapsibleStub = ({ label, iconName }) => {
   )
 }
 
+const OverflowTabBar = ({ tabs, activeTab, onTabChange }) => {
+  const containerRef = useRef(null)
+  const measureRef   = useRef(null)
+  const dropdownRef  = useRef(null)
+  const [visibleCount, setVisibleCount] = useState(tabs.length)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  useEffect(() => {
+    const container = containerRef.current
+    const measure   = measureRef.current
+    if (!container || !measure) return
+
+    const recalculate = () => {
+      const containerWidth = container.offsetWidth
+      const tabWidths      = Array.from(measure.children).map(el => el.offsetWidth)
+      const totalWidth     = tabWidths.reduce((a, b) => a + b, 0)
+
+      if (totalWidth <= containerWidth) {
+        setVisibleCount(tabs.length)
+        return
+      }
+
+      // Reserve ~88px for the "+N more" button
+      let used  = 88
+      let count = 0
+      for (const w of tabWidths) {
+        if (used + w > containerWidth) break
+        used += w
+        count++
+      }
+      setVisibleCount(Math.max(0, count))
+    }
+
+    recalculate()
+    const ro = new ResizeObserver(recalculate)
+    ro.observe(container)
+    return () => ro.disconnect()
+  }, [tabs])
+
+  useEffect(() => {
+    if (!dropdownOpen) return
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [dropdownOpen])
+
+  const visibleTabs      = tabs.slice(0, visibleCount)
+  const overflowTabs     = tabs.slice(visibleCount)
+  const activeInOverflow = overflowTabs.some(t => t.id === activeTab)
+
+  const tabBtnStyle = (id) => ({
+    display:      'inline-flex',
+    alignItems:   'center',
+    gap:          spacing.xs,
+    padding:      `${spacing.m} ${spacing.m}`,
+    background:   'transparent',
+    border:       'none',
+    borderBottom: `2px solid ${activeTab === id ? colors.teal : 'transparent'}`,
+    cursor:       'pointer',
+    fontFamily:   fontFamilies.body,
+    fontSize:     typeScale.ui.size,
+    fontWeight:   activeTab === id ? 500 : 400,
+    color:        activeTab === id ? colors.ink : colors.textSecondary,
+    whiteSpace:   'nowrap',
+    transition:   `all ${micro}`,
+    marginBottom: '-1px',
+  })
+
+  const renderBadge = (tab) => tab.badge > 0 ? (
+    <span style={{
+      display:        'inline-flex',
+      alignItems:     'center',
+      justifyContent: 'center',
+      minWidth:       16,
+      height:         16,
+      padding:        '0 4px',
+      borderRadius:   radii.sm,
+      background:     activeTab === tab.id ? colors.teal : colors.stone2,
+      color:          activeTab === tab.id ? colors.white : colors.textSecondary,
+      fontSize:       '10px',
+      fontWeight:     600,
+      lineHeight:     1,
+    }}>
+      {tab.badge}
+    </span>
+  ) : null
+
+  return (
+    <div style={{ position: 'relative' }}>
+      {/* Hidden measurement strip — renders all tabs at natural width */}
+      <div
+        ref={measureRef}
+        aria-hidden="true"
+        style={{
+          position:      'absolute',
+          visibility:    'hidden',
+          pointerEvents: 'none',
+          display:       'flex',
+          top:           0,
+          left:          0,
+        }}
+      >
+        {tabs.map(tab => (
+          <button key={tab.id} style={tabBtnStyle(tab.id)}>
+            {tab.label}
+            {renderBadge(tab)}
+          </button>
+        ))}
+      </div>
+
+      {/* Visible tab row */}
+      <div ref={containerRef} style={{ display: 'flex' }}>
+        {visibleTabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            style={tabBtnStyle(tab.id)}
+            onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.color = colors.ink }}
+            onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.color = colors.textSecondary }}
+          >
+            {tab.label}
+            {renderBadge(tab)}
+          </button>
+        ))}
+
+        {overflowTabs.length > 0 && (
+          <div ref={dropdownRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setDropdownOpen(o => !o)}
+              style={{
+                display:      'inline-flex',
+                alignItems:   'center',
+                gap:          spacing.xs,
+                padding:      `${spacing.m} ${spacing.m}`,
+                background:   'transparent',
+                border:       'none',
+                borderBottom: `2px solid ${activeInOverflow ? colors.teal : 'transparent'}`,
+                cursor:       'pointer',
+                fontFamily:   fontFamilies.body,
+                fontSize:     typeScale.ui.size,
+                fontWeight:   activeInOverflow ? 500 : 400,
+                color:        activeInOverflow ? colors.ink : colors.textSecondary,
+                whiteSpace:   'nowrap',
+                transition:   `all ${micro}`,
+                marginBottom: '-1px',
+              }}
+              onMouseEnter={e => { if (!activeInOverflow) e.currentTarget.style.color = colors.ink }}
+              onMouseLeave={e => { if (!activeInOverflow) e.currentTarget.style.color = colors.textSecondary }}
+            >
+              +{overflowTabs.length} more
+              <Icon
+                name="chevron-down"
+                size={12}
+                color="currentColor"
+                style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'none', transition: `transform ${micro}` }}
+              />
+            </button>
+
+            {dropdownOpen && (
+              <div style={{
+                position:     'absolute',
+                top:          'calc(100% + 4px)',
+                right:        0,
+                zIndex:       30,
+                background:   colors.white,
+                border:       `1px solid ${colors.border}`,
+                borderRadius: radii.md,
+                boxShadow:    shadows.sm,
+                minWidth:     160,
+                overflow:     'hidden',
+              }}>
+                {overflowTabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => { onTabChange(tab.id); setDropdownOpen(false) }}
+                    style={{
+                      display:    'flex',
+                      alignItems: 'center',
+                      gap:        spacing.xs,
+                      width:      '100%',
+                      padding:    `${spacing.s} ${spacing.m}`,
+                      background: activeTab === tab.id ? colors.stone : 'transparent',
+                      border:     'none',
+                      cursor:     'pointer',
+                      fontFamily: fontFamilies.body,
+                      fontSize:   typeScale.ui.size,
+                      fontWeight: activeTab === tab.id ? 500 : 400,
+                      color:      activeTab === tab.id ? colors.ink : colors.textSecondary,
+                      textAlign:  'left',
+                      transition: `background ${micro}`,
+                    }}
+                    onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.background = colors.stone }}
+                    onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.background = 'transparent' }}
+                  >
+                    {tab.label}
+                    {tab.badge > 0 && (
+                      <span style={{
+                        marginLeft:     'auto',
+                        display:        'inline-flex',
+                        alignItems:     'center',
+                        justifyContent: 'center',
+                        minWidth:       16,
+                        height:         16,
+                        padding:        '0 4px',
+                        borderRadius:   radii.sm,
+                        background:     activeTab === tab.id ? colors.teal : colors.stone2,
+                        color:          activeTab === tab.id ? colors.white : colors.textSecondary,
+                        fontSize:       '10px',
+                        fontWeight:     600,
+                        lineHeight:     1,
+                      }}>
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 const NodeDetailShell = ({
   nodeType,
   nodeSubtype,
@@ -241,53 +470,11 @@ const NodeDetailShell = ({
               paddingLeft:  spacing.xl2,
             }}
           >
-            <div style={{ display: 'flex', gap: 0, overflowX: 'auto' }}>
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    display:      'inline-flex',
-                    alignItems:   'center',
-                    gap:          spacing.xs,
-                    padding:      `${spacing.m} ${spacing.m}`,
-                    background:   'transparent',
-                    border:       'none',
-                    borderBottom: `2px solid ${activeTab === tab.id ? colors.teal : 'transparent'}`,
-                    cursor:       'pointer',
-                    fontFamily:   fontFamilies.body,
-                    fontSize:     typeScale.ui.size,
-                    fontWeight:   activeTab === tab.id ? 500 : 400,
-                    color:        activeTab === tab.id ? colors.ink : colors.textSecondary,
-                    whiteSpace:   'nowrap',
-                    transition:   `all ${micro}`,
-                    marginBottom: '-1px',
-                  }}
-                  onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.color = colors.ink }}
-                  onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.color = colors.textSecondary }}
-                >
-                  {tab.label}
-                  {tab.badge > 0 && (
-                    <span style={{
-                      display:        'inline-flex',
-                      alignItems:     'center',
-                      justifyContent: 'center',
-                      minWidth:       16,
-                      height:         16,
-                      padding:        '0 4px',
-                      borderRadius:   radii.sm,
-                      background:     activeTab === tab.id ? colors.teal : colors.stone2,
-                      color:          activeTab === tab.id ? colors.white : colors.textSecondary,
-                      fontSize:       '10px',
-                      fontWeight:     600,
-                      lineHeight:     1,
-                    }}>
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
+            <OverflowTabBar
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
           </nav>
 
           {/* Tab content */}
