@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { colors, fontFamilies, typeScale, spacing, radii, shadows, duration, easing } from '@/tokens'
 import { Icon, Button, Pill } from './Components'
-import { RelationshipMapSlot } from './RelationshipMapSlot'
 
 // Must match Shell.jsx CHROME_HEIGHT — the sticky page header height.
 const CHROME_HEIGHT = 60
@@ -20,50 +19,6 @@ const SIDE_TABS = [
 
 const micro = `${duration.micro} ${easing.out}`
 
-const CollapsibleStub = ({ label, iconName }) => {
-  const [open, setOpen] = useState(false)
-  return (
-    <div style={{ background: colors.white, borderRadius: radii.lg, boxShadow: shadows.sm, overflow: 'hidden' }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          width: '100%', padding: `${spacing.m} ${spacing.l}`,
-          background: 'transparent', border: 'none', cursor: 'pointer',
-          transition: `background ${micro}`,
-        }}
-        onMouseEnter={e => e.currentTarget.style.background = colors.stone}
-        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
-          <Icon name={iconName} size={14} color={colors.textTertiary} strokeWidth={1.5} />
-          <span style={{
-            fontFamily:    fontFamilies.body,
-            fontSize:      typeScale.labelB.size,
-            fontWeight:    600,
-            color:         colors.textTertiary,
-            letterSpacing: '0.04em',
-          }}>
-            {label}
-          </span>
-        </div>
-        <Icon
-          name="chevron-down"
-          size={14}
-          color={colors.textTertiary}
-          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: `transform ${micro}` }}
-        />
-      </button>
-      {open && (
-        <div style={{ padding: `${spacing.m} ${spacing.l} ${spacing.l}`, borderTop: `1px solid ${colors.border}` }}>
-          <div style={{ fontSize: typeScale.body.size, color: colors.textTertiary, lineHeight: typeScale.body.lineHeight }}>
-            No records yet.
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 const OverflowTabBar = ({ tabs, activeTab, onTabChange }) => {
   const containerRef = useRef(null)
@@ -137,7 +92,8 @@ const OverflowTabBar = ({ tabs, activeTab, onTabChange }) => {
     marginBottom: '-1px',
   })
 
-  const renderBadge = (tab) => tab.badge > 0 ? (
+  const showBadge = (b) => b != null && b !== '' && b !== 0 && b !== false
+  const renderBadge = (tab) => showBadge(tab.badge) ? (
     <span style={{
       display:        'inline-flex',
       alignItems:     'center',
@@ -264,7 +220,7 @@ const OverflowTabBar = ({ tabs, activeTab, onTabChange }) => {
                     onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.background = 'transparent' }}
                   >
                     {tab.label}
-                    {tab.badge > 0 && (
+                    {showBadge(tab.badge) && (
                       <span style={{
                         marginLeft:     'auto',
                         display:        'inline-flex',
@@ -440,17 +396,6 @@ const NodeDetailShell = ({
           {/* Tab content */}
           <div style={{ marginBottom: spacing.xl }}>
             {activeContent}
-          </div>
-
-          {/* Relationship map slot */}
-          <div style={{ marginBottom: spacing.l }}>
-            <RelationshipMapSlot nodeName={name} />
-          </div>
-
-          {/* Collapsible stubs */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.s }}>
-            <CollapsibleStub label="Activity & history" iconName="history" />
-            <CollapsibleStub label="Audit"              iconName="check-check" />
           </div>
         </div>
 

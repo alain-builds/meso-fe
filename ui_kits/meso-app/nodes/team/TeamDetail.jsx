@@ -44,16 +44,16 @@ const DEFAULTS = {
     { id: 'l2', name: 'Thomas Weber',       role: 'Staff Engineer',      isVacant: false, isExternal: false },
   ],
   members: [
-    { id: 'm1', name: 'Sarah van der Berg', role: 'Engineering Manager',   isVacant: false, isExternal: false },
-    { id: 'm2', name: 'Thomas Weber',       role: 'Staff Engineer',        isVacant: false, isExternal: false },
-    { id: 'm3', name: 'Katarina Novak',     role: 'SRE Lead',              isVacant: false, isExternal: false },
-    { id: 'm4', name: 'Jin Park',           role: 'Senior Engineer',       isVacant: false, isExternal: false },
-    { id: 'm5', name: 'Anika Bauer',        role: 'Senior Engineer',       isVacant: false, isExternal: false },
-    { id: 'm6', name: 'Remi Fontaine',      role: 'Senior Engineer',       isVacant: false, isExternal: true  },
-    { id: 'm7', name: 'Lars Eriksson',      role: 'Engineer',              isVacant: false, isExternal: false },
-    { id: 'm8', name: 'Mia Santos',         role: 'Engineer',              isVacant: false, isExternal: true  },
-    { id: 'm9', name: '',                   role: 'Senior Engineer',       isVacant: true,  isExternal: false },
-    { id: 'm10',name: '',                   role: 'On-call escalation',    isVacant: true,  isExternal: false },
+    { id: 'm1', name: 'Sarah van der Berg', role: 'Engineering Manager',   isVacant: false, isExternal: false, staffedAt: 'Mar 2022' },
+    { id: 'm2', name: 'Thomas Weber',       role: 'Staff Engineer',        isVacant: false, isExternal: false, staffedAt: 'Jun 2022' },
+    { id: 'm3', name: 'Katarina Novak',     role: 'SRE Lead',              isVacant: false, isExternal: false, staffedAt: 'Jan 2023' },
+    { id: 'm4', name: 'Jin Park',           role: 'Senior Engineer',       isVacant: false, isExternal: false, staffedAt: 'Apr 2023' },
+    { id: 'm5', name: 'Anika Bauer',        role: 'Senior Engineer',       isVacant: false, isExternal: false, staffedAt: 'Sep 2023' },
+    { id: 'm6', name: 'Remi Fontaine',      role: 'Senior Engineer',       isVacant: false, isExternal: true,  staffedAt: 'Feb 2024' },
+    { id: 'm7', name: 'Lars Eriksson',      role: 'Engineer',              isVacant: false, isExternal: false, staffedAt: 'May 2024' },
+    { id: 'm8', name: 'Mia Santos',         role: 'Engineer',              isVacant: false, isExternal: true,  staffedAt: 'Nov 2024' },
+    { id: 'm9', name: '',                   role: 'Senior Engineer',       isVacant: true,  isExternal: false, staffedAt: null        },
+    { id: 'm10',name: '',                   role: 'On-call escalation',    isVacant: true,  isExternal: false, staffedAt: null        },
   ],
   servicesProvidedList: [
     { id: 's1', name: 'CI/CD Platform',      type: 'technical', sla: '99.5% uptime', slaStatus: 'green' },
@@ -118,10 +118,10 @@ const TEAM_DETAILS = {
       { id: 'l1', name: 'Marco Lehmann', role: 'Engineering Manager', isVacant: false, isExternal: false },
     ],
     members: [
-      { id: 'm1', name: 'Marco Lehmann', role: 'Engineering Manager', isVacant: false, isExternal: false },
-      { id: 'm2', name: 'Priya Nair',    role: 'Data Engineer',       isVacant: false, isExternal: false },
-      { id: 'm3', name: 'Ahmed Hassan',  role: 'Data Engineer',       isVacant: false, isExternal: true  },
-      { id: 'm4', name: '',              role: 'Staff Data Engineer',  isVacant: true,  isExternal: false },
+      { id: 'm1', name: 'Marco Lehmann', role: 'Engineering Manager', isVacant: false, isExternal: false, staffedAt: 'Jun 2022' },
+      { id: 'm2', name: 'Priya Nair',    role: 'Data Engineer',       isVacant: false, isExternal: false, staffedAt: 'Oct 2022' },
+      { id: 'm3', name: 'Ahmed Hassan',  role: 'Data Engineer',       isVacant: false, isExternal: true,  staffedAt: 'Mar 2024' },
+      { id: 'm4', name: '',              role: 'Staff Data Engineer',  isVacant: true,  isExternal: false, staffedAt: null        },
     ],
     directMemberCount: 4, totalMemberCount: 4,
     directInternalMemberCount: 3, directExternalMemberCount: 1,
@@ -141,9 +141,9 @@ const TEAM_DETAILS = {
       { id: 'l1', name: '', role: 'Head of Security & Compliance', isVacant: true, isExternal: false },
     ],
     members: [
-      { id: 'm1', name: '', role: 'Head of Security & Compliance', isVacant: true,  isExternal: false },
-      { id: 'm2', name: 'Ana Petrova', role: 'Security Engineer',  isVacant: false, isExternal: false },
-      { id: 'm3', name: 'Omar Aziz',   role: 'Compliance Analyst', isVacant: false, isExternal: false },
+      { id: 'm1', name: '',            role: 'Head of Security & Compliance', isVacant: true,  isExternal: false, staffedAt: null        },
+      { id: 'm2', name: 'Ana Petrova', role: 'Security Engineer',             isVacant: false, isExternal: false, staffedAt: 'Oct 2023' },
+      { id: 'm3', name: 'Omar Aziz',   role: 'Compliance Analyst',            isVacant: false, isExternal: false, staffedAt: 'Jan 2024' },
     ],
     directMemberCount: 3, totalMemberCount: 3,
     directInternalMemberCount: 2, directExternalMemberCount: 1,
@@ -165,12 +165,13 @@ const mapStatus = (s) => {
 }
 
 const TeamDetail = ({ team, onRemove, onTitleVisibilityChange }) => {
-  const detail      = getDetail(team)
-  const vacancyCount = detail.members.filter(m => m.isVacant).length
+  const detail     = getDetail(team)
+  const filled     = detail.members.filter(m => !m.isVacant).length
+  const totalRoles = detail.members.length
 
   const tabs = [
     { id: 'about',       label: 'About',          content: <AboutTab       detail={detail} /> },
-    { id: 'people',      label: 'People & roles', badge: vacancyCount,     content: <PeopleTab      detail={detail} /> },
+    { id: 'people',      label: 'People & roles', badge: `${filled} / ${totalRoles}`, content: <PeopleTab detail={detail} /> },
     { id: 'services',    label: 'Services',       content: <ServicesTab    detail={detail} /> },
     { id: 'delivery',    label: 'Delivery',       content: <DeliveryTab    detail={detail} /> },
     { id: 'performance', label: 'Performance',    content: <PerformanceTab detail={detail} /> },

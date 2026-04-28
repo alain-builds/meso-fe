@@ -1,7 +1,6 @@
 import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
 import { PersonCard } from '../../../shared/PersonCard'
 import { MemberTable } from '../../../shared/MemberTable'
-import { MetricsBar }  from '../../../shared/MetricsBar'
 
 const SectionHeading = ({ children }) => (
   <div style={{
@@ -17,62 +16,200 @@ const SectionHeading = ({ children }) => (
   </div>
 )
 
-const SectionCard = ({ children }) => (
+const SectionCard = ({ children, style }) => (
   <div style={{
     background:   colors.white,
     borderRadius: radii.lg,
     boxShadow:    shadows.sm,
     padding:      spacing.l,
+    ...style,
   }}>
     {children}
   </div>
 )
 
-const PeopleTab = ({ detail }) => {
-  const vacancyCount = detail.members?.filter(m => m.isVacant).length ?? 0
+const LegendRow = ({ dotColor, dashed, label, value }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
+    <div style={{
+      width:        8,
+      height:       8,
+      borderRadius: '50%',
+      flexShrink:   0,
+      background:   dashed ? 'transparent' : dotColor,
+      border:       dashed ? `1.5px dashed ${colors.borderMid}` : 'none',
+    }} />
+    <span style={{
+      fontFamily: fontFamilies.body,
+      fontSize:   typeScale.labelB.size,
+      color:      colors.textSecondary,
+      flex:       1,
+    }}>
+      {label}
+    </span>
+    <span style={{
+      fontFamily: fontFamilies.body,
+      fontSize:   typeScale.ui.size,
+      fontWeight: 500,
+      color:      colors.ink,
+    }}>
+      {value}
+    </span>
+  </div>
+)
 
-  const chips = [
-    { id: 'total',     value: `${detail.directMemberCount}`,          label: 'members'  },
-    { id: 'vacancies', value: vacancyCount > 0 ? `${vacancyCount}` : 'None', label: 'vacancies' },
-    { id: 'internal',  value: `${detail.directInternalMemberCount}`,  label: 'internal' },
-    { id: 'external',  value: `${detail.directExternalMemberCount}`,  label: 'external' },
-  ]
+const PeopleOverviewCard = ({ members, asOf }) => {
+  const filledInternal = members.filter(m => !m.isVacant && !m.isExternal).length
+  const filledExternal = members.filter(m => !m.isVacant &&  m.isExternal).length
+  const vacancies      = members.filter(m =>  m.isVacant).length
+  const filled         = filledInternal + filledExternal
+  const total          = members.length
+
+  return (
+    <SectionCard style={{ flex: 1 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <SectionHeading>Staffing data</SectionHeading>
+        {asOf && (
+          <span style={{
+            fontFamily: fontFamilies.body,
+            fontSize:   typeScale.labelB.size,
+            color:      colors.textTertiary,
+            whiteSpace: 'nowrap',
+          }}>
+            as of {asOf}
+          </span>
+        )}
+      </div>
+
+      {/* Stat pills */}
+      <div style={{ display: 'flex', gap: spacing.s, marginBottom: spacing.m }}>
+        <div style={{
+          flex:         1,
+          background:   colors.stone,
+          borderRadius: radii.md,
+          padding:      `${spacing.s} ${spacing.m}`,
+          display:      'flex',
+          alignItems:   'baseline',
+          gap:          spacing.xs,
+        }}>
+          <div style={{
+            fontFamily:    fontFamilies.display,
+            fontSize:      typeScale.h3.size,
+            fontWeight:    typeScale.h3.weight,
+            letterSpacing: typeScale.h3.letterSpacing,
+            lineHeight:    1.1,
+            color:         colors.ink,
+          }}>
+            {filled}
+          </div>
+          <div style={{
+            fontFamily: fontFamilies.body,
+            fontSize:   typeScale.labelB.size,
+            fontWeight: 600,
+            color:      colors.textSecondary,
+          }}>
+            members
+          </div>
+        </div>
+
+        <div style={{
+          flex:         1,
+          background:   colors.stone,
+          borderRadius: radii.md,
+          padding:      `${spacing.s} ${spacing.m}`,
+          display:      'flex',
+          alignItems:   'baseline',
+          gap:          spacing.xs,
+        }}>
+          <div style={{
+            fontFamily:    fontFamilies.display,
+            fontSize:      typeScale.h3.size,
+            fontWeight:    typeScale.h3.weight,
+            letterSpacing: typeScale.h3.letterSpacing,
+            lineHeight:    1.1,
+            color:         colors.ink,
+          }}>
+            {total}
+          </div>
+          <div style={{
+            fontFamily: fontFamilies.body,
+            fontSize:   typeScale.labelB.size,
+            fontWeight: 600,
+            color:      colors.textSecondary,
+          }}>
+            roles
+          </div>
+        </div>
+      </div>
+
+      {/* Composition bar — 3 segments always sum to 100% */}
+      <div style={{
+        display:      'flex',
+        height:       6,
+        borderRadius: radii.sm,
+        overflow:     'hidden',
+        marginBottom: spacing.m,
+      }}>
+        {total > 0 && (
+          <>
+            <div style={{ width: `${(filledInternal / total) * 100}%`, background: colors.teal      }} />
+            <div style={{ width: `${(filledExternal / total) * 100}%`, background: colors.ink       }} />
+            <div style={{ width: `${(vacancies      / total) * 100}%`, background: colors.borderMid }} />
+          </>
+        )}
+      </div>
+
+      {/* Legend */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.s }}>
+        <LegendRow dotColor={colors.teal}      label="Internal"  value={filledInternal} />
+        <LegendRow dotColor={colors.ink}       label="External"  value={filledExternal} />
+        <LegendRow dotColor={colors.borderMid} label="Vacancies" value={vacancies}      />
+      </div>
+    </SectionCard>
+  )
+}
+
+const PeopleTab = ({ detail }) => {
+  const roleCount    = detail.members.length
+  const memberCount  = detail.members.filter(m => !m.isVacant).length
+  const vacancyCount = detail.members.filter(m =>  m.isVacant).length
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.l }}>
 
-      <MetricsBar chips={chips} />
+      {/* Top row: composition overview + team leads */}
+      <div style={{ display: 'flex', gap: spacing.l, alignItems: 'stretch' }}>
+        <PeopleOverviewCard members={detail.members} asOf={detail.updatedAt} />
 
-      {/* Team leads */}
-      <SectionCard>
-        <SectionHeading>Team leads</SectionHeading>
-        {detail.leads.length === 0 ? (
-          <div style={{
-            fontFamily: fontFamilies.body,
-            fontSize:   typeScale.body.size,
-            color:      colors.textTertiary,
-            padding:    `${spacing.m} 0`,
-          }}>
-            No leads assigned.
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {detail.leads.map((lead, i) => (
-              <div
-                key={lead.id}
-                style={{ borderBottom: i < detail.leads.length - 1 ? `1px solid ${colors.border}` : 'none' }}
-              >
-                <PersonCard
-                  name={lead.name}
-                  roleLabel={lead.role}
-                  isVacant={lead.isVacant}
-                  isExternal={lead.isExternal}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </SectionCard>
+        <SectionCard style={{ flex: 1 }}>
+          <SectionHeading>Team leads</SectionHeading>
+          {detail.leads.length === 0 ? (
+            <div style={{
+              fontFamily: fontFamilies.body,
+              fontSize:   typeScale.body.size,
+              color:      colors.textTertiary,
+              padding:    `${spacing.m} 0`,
+            }}>
+              No leads assigned.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              {detail.leads.map((lead, i) => (
+                <div
+                  key={lead.id}
+                  style={{ borderBottom: i < detail.leads.length - 1 ? `1px solid ${colors.border}` : 'none' }}
+                >
+                  <PersonCard
+                    name={lead.name}
+                    roleLabel={lead.role}
+                    isVacant={lead.isVacant}
+                    isExternal={lead.isExternal}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionCard>
+      </div>
 
       {/* Members & roles */}
       <SectionCard>
@@ -82,59 +219,17 @@ const PeopleTab = ({ detail }) => {
             fontFamily: fontFamilies.body,
             fontSize:   typeScale.labelB.size,
             color:      colors.textTertiary,
+            display:    'flex',
+            gap:        spacing.s,
           }}>
-            {detail.members.length} total
+            <span>{roleCount} roles</span>
+            <span style={{ color: colors.borderMid }}>·</span>
+            <span>{memberCount} members</span>
+            <span style={{ color: colors.borderMid }}>·</span>
+            <span>{vacancyCount} {vacancyCount === 1 ? 'vacancy' : 'vacancies'}</span>
           </span>
         </div>
         <MemberTable members={detail.members} emptyMessage="No members assigned to this team." />
-      </SectionCard>
-
-      {/* Internal / external split */}
-      <SectionCard>
-        <SectionHeading>Internal / external split</SectionHeading>
-        <div style={{ display: 'flex', gap: spacing.xl }}>
-          <div>
-            <div style={{
-              fontFamily:    fontFamilies.display,
-              fontSize:      typeScale.h3.size,
-              fontWeight:    typeScale.h3.weight,
-              letterSpacing: typeScale.h3.letterSpacing,
-              color:         colors.ink,
-              lineHeight:    1.1,
-            }}>
-              {detail.directInternalMemberCount}
-            </div>
-            <div style={{
-              fontFamily: fontFamilies.body,
-              fontSize:   typeScale.labelB.size,
-              color:      colors.textTertiary,
-              marginTop:  '4px',
-            }}>
-              Internal
-            </div>
-          </div>
-          <div style={{ width: '1px', background: colors.border, alignSelf: 'stretch' }} />
-          <div>
-            <div style={{
-              fontFamily:    fontFamilies.display,
-              fontSize:      typeScale.h3.size,
-              fontWeight:    typeScale.h3.weight,
-              letterSpacing: typeScale.h3.letterSpacing,
-              color:         colors.ink,
-              lineHeight:    1.1,
-            }}>
-              {detail.directExternalMemberCount}
-            </div>
-            <div style={{
-              fontFamily: fontFamilies.body,
-              fontSize:   typeScale.labelB.size,
-              color:      colors.textTertiary,
-              marginTop:  '4px',
-            }}>
-              External
-            </div>
-          </div>
-        </div>
       </SectionCard>
 
     </div>
