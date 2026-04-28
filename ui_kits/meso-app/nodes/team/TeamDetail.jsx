@@ -1,7 +1,10 @@
-import { NodeDetailShell } from '../../NodeDetailShell'
-import { AboutTab }         from './tabs/AboutTab'
-import { MembersTab }       from './tabs/MembersTab'
-import { TabStub }          from './tabs/TabStub'
+import { NodeDetailShell }   from '../../NodeDetailShell'
+import { NodeOverviewPanel } from '../../shared/NodeOverviewPanel'
+import { AboutTab }          from './tabs/AboutTab'
+import { PeopleTab }         from './tabs/PeopleTab'
+import { ServicesTab }       from './tabs/ServicesTab'
+import { DeliveryTab }       from './tabs/DeliveryTab'
+import { PerformanceTab }    from './tabs/PerformanceTab'
 
 // Extended mock detail data keyed by team id.
 // Falls back to DEFAULTS for teams not listed here.
@@ -51,6 +54,53 @@ const DEFAULTS = {
     { id: 'm8', name: 'Mia Santos',         role: 'Engineer',              isVacant: false, isExternal: true  },
     { id: 'm9', name: '',                   role: 'Senior Engineer',       isVacant: true,  isExternal: false },
     { id: 'm10',name: '',                   role: 'On-call escalation',    isVacant: true,  isExternal: false },
+  ],
+  servicesProvidedList: [
+    { id: 's1', name: 'CI/CD Platform',      type: 'technical', sla: '99.5% uptime', slaStatus: 'green' },
+    { id: 's2', name: 'Observability Stack', type: 'technical', sla: '99% uptime',   slaStatus: 'green' },
+    { id: 's3', name: 'Dev Portal',          type: 'business',  sla: null,           slaStatus: 'amber' },
+  ],
+  servicesConsumedList: [
+    { id: 'sc1', name: 'Identity & Access', providerTeam: 'Security',   slaStatus: 'green' },
+    { id: 'sc2', name: 'HR Data Feed',      providerTeam: 'People Ops', slaStatus: 'amber' },
+  ],
+  serviceDependencies: {
+    inbound:  [ { id: 'd1', name: 'Feature Teams',        meta: 'depends on CI/CD Platform'      } ],
+    outbound: [ { id: 'd2', name: 'Cloud Infrastructure', meta: 'CI/CD Platform depends on this' } ],
+  },
+  valueStreams: [
+    { id: 'vs1', name: 'Developer Experience', contribution: 'contributes', businessOutcome: 'Reduce time-to-deploy across all product teams' },
+    { id: 'vs2', name: 'Platform Reliability', contribution: 'owns',        businessOutcome: 'Maintain 99.9% platform SLA'                    },
+  ],
+  processes: [
+    { id: 'p1', name: 'Incident Response',   type: 'operational', status: 'active' },
+    { id: 'p2', name: 'Deployment Pipeline', type: 'technical',   status: 'active' },
+    { id: 'p3', name: 'Capacity Planning',   type: 'operational', status: 'active' },
+  ],
+  okrs: [
+    {
+      id: 'okr1', title: 'Achieve zero-downtime deployments', period: 'Q2-2025',
+      progressStatus: 'on_track', confidenceScore: 80,
+      keyResults: [
+        { id: 'kr1', title: 'Reduce failed deploys to < 0.5%',    progressStatus: 'on_track', currentValue: 0.8, targetValue: 0.5, unit: '%'          },
+        { id: 'kr2', title: 'Deploy frequency ≥ 10 deploys/week', progressStatus: 'on_track', currentValue: 8,   targetValue: 10,  unit: 'deploys/wk' },
+      ],
+    },
+    {
+      id: 'okr2', title: 'Reduce platform operational toil by 40%', period: 'Q2-2025',
+      progressStatus: 'at_risk', confidenceScore: 55,
+      keyResults: [
+        { id: 'kr3', title: 'Automated toil < 20% of engineering time', progressStatus: 'at_risk', currentValue: 32, targetValue: 20, unit: '%' },
+      ],
+    },
+  ],
+  kpis: [
+    { id: 'kpi1', name: 'MTTR',              category: 'operational', contributionType: 'owns',        direction: 'lower_is_better',  unit: 'hours'        },
+    { id: 'kpi2', name: 'Deploy frequency',  category: 'operational', contributionType: 'contributes', direction: 'higher_is_better', unit: 'deploys/week' },
+    { id: 'kpi3', name: 'Infra cost / head', category: 'financial',   contributionType: 'influences',  direction: 'lower_is_better',  unit: 'EUR'          },
+  ],
+  costCenters: [
+    { id: 'cc1', name: 'Platform Engineering', code: 'CC-4720', type: 'operational', allocationPercent: 100 },
   ],
   createdAt: 'Mar 12, 2022',
   createdBy: 'Sarah van der Berg',
@@ -118,56 +168,21 @@ const TeamDetail = ({ team, onRemove, onTitleVisibilityChange }) => {
   const detail      = getDetail(team)
   const vacancyCount = detail.members.filter(m => m.isVacant).length
 
-  const statTiles = [
-    {
-      id:    'headcount',
-      label: 'Headcount',
-      value: `${detail.directMemberCount}`,
-      sub:   `${detail.directInternalMemberCount} internal · ${detail.directExternalMemberCount} external`,
-    },
-    {
-      id:    'vacancies',
-      label: 'Vacancies',
-      value: vacancyCount > 0 ? `${vacancyCount} open` : 'None',
-      sub:   `of ${detail.members.length} roles`,
-    },
-    {
-      id:    'services',
-      label: 'Services',
-      value: `${detail.servicesProvided} provided`,
-      sub:   `${detail.servicesConsumed} consumed`,
-    },
-    {
-      id:    'okr-health',
-      label: 'OKR health',
-      value: `${detail.okrHealth}%`,
-      sub:   'on track',
-    },
-    {
-      id:    'cost',
-      label: 'Annual cost',
-      value: '—',
-      sub:   'Cost centre not set',
-    },
-    {
-      id:    'team-type',
-      label: 'Team type',
-      value: detail.teamType.replace(/_/g, ' '),
-      sub:   'Team Topologies',
-    },
+  const tabs = [
+    { id: 'about',       label: 'About',          content: <AboutTab       detail={detail} /> },
+    { id: 'people',      label: 'People & roles', badge: vacancyCount,     content: <PeopleTab      detail={detail} /> },
+    { id: 'services',    label: 'Services',       content: <ServicesTab    detail={detail} /> },
+    { id: 'delivery',    label: 'Delivery',       content: <DeliveryTab    detail={detail} /> },
+    { id: 'performance', label: 'Performance',    content: <PerformanceTab detail={detail} /> },
   ]
 
-  const tabs = [
-    { id: 'about',         label: 'About',          content: <AboutTab   detail={detail} /> },
-    { id: 'members',       label: 'Members & roles', badge: vacancyCount, content: <MembersTab detail={detail} /> },
-    { id: 'services',      label: 'Services',        content: <TabStub section="Services · §3.3"          /> },
-    { id: 'value-streams', label: 'Value streams',   content: <TabStub section="Value streams · §3.3"     /> },
-    { id: 'capabilities',  label: 'Capabilities',    content: <TabStub section="Capabilities owned · §3.3" /> },
-    { id: 'okrs-kpis',     label: 'OKRs & KPIs',    content: <TabStub section="OKRs & KPIs · §3.3"       /> },
-    { id: 'governance',    label: 'Governance',      content: <TabStub section="Governance · §3.3"        /> },
-    { id: 'relationships', label: 'Relationships',   content: <TabStub section="Relationships · §3.3"     /> },
-    { id: 'cost',          label: 'Cost',            content: <TabStub section="Cost · §3.3"              /> },
-    { id: 'processes',     label: 'Processes',       content: <TabStub section="Processes · §3.3"         /> },
+  const overviewFields = [
+    { type: 'description', value: detail.purpose },
+    { type: 'text',   label: 'Domain',    value: detail.domain },
+    { type: 'pill',   label: 'Team type', value: detail.teamType.replace(/_/g, ' ') },
+    { type: 'person', label: 'Lead(s)',   people: detail.leads },
+    { type: 'date',   label: 'Last updated', date: detail.updatedAt, by: detail.updatedBy },
+    { type: 'links',  label: 'Workspace links', links: detail.workspaceLinks },
   ]
 
   return (
@@ -180,7 +195,7 @@ const TeamDetail = ({ team, onRemove, onTitleVisibilityChange }) => {
       createdBy={detail.createdBy}
       updatedAt={detail.updatedAt}
       updatedBy={detail.updatedBy}
-      statTiles={statTiles}
+      sidebarContent={<NodeOverviewPanel name={team.name} fields={overviewFields} />}
       tabs={tabs}
       onTitleVisibilityChange={onTitleVisibilityChange}
     />

@@ -1,5 +1,6 @@
 import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
 import { Icon } from '../../../Components'
+import { MetricsBar } from '../../../shared/MetricsBar'
 
 const SectionHeading = ({ children }) => (
   <div style={{
@@ -27,8 +28,19 @@ const SectionCard = ({ children, style = {} }) => (
   </div>
 )
 
-const AboutTab = ({ detail }) => (
+const AboutTab = ({ detail }) => {
+  const vacancyCount = detail.members?.filter(m => m.isVacant).length ?? 0
+  const chips = [
+    { id: 'headcount',  value: `${detail.directMemberCount}`,          label: 'members'                             },
+    { id: 'vacancies',  value: vacancyCount > 0 ? `${vacancyCount}` : 'None', label: 'vacancies'                   },
+    { id: 'okr-health', value: `${detail.okrHealth}%`,                 label: 'OKR health'                         },
+    { id: 'services',   value: `${detail.servicesProvided} provided`,   label: `${detail.servicesConsumed} consumed` },
+  ]
+
+  return (
   <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.l }}>
+
+    <MetricsBar chips={chips} />
 
     {/* Purpose */}
     <SectionCard>
@@ -170,6 +182,7 @@ const AboutTab = ({ detail }) => (
 
     </div>
   </div>
-)
+  )
+}
 
 export { AboutTab }

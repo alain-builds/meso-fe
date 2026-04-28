@@ -1,88 +1,64 @@
-# Node Detail — Task List
+# Team Detail Five-Tab Redesign — Task List
 
-## Phase 1: Shell & Building Blocks
+> Spec: `SPEC.md` · Plan: `tasks/plan.md`
 
-- [ ] **Task 1** — Build `NodeDetailShell.jsx`, `StatStrip.jsx`, `RelationshipMapSlot.jsx`
-  - Header: name, type badge, status chip, breadcrumb, back nav, action buttons (Edit, Share, Export)
-  - StatStrip: renders tile array `{ id, label, value, sub? }`
-  - Tab nav: active tab underlined in teal, switches content
-  - RelationshipMapSlot: dark-card placeholder (same style as old graph view card)
-  - Activity log + audit panel as collapsed stubs
-  - Verify: renders with hardcoded Team data in main.jsx
+## Phase 1: Data Foundation
 
-- [ ] **Task 2** — Build shared building blocks
-  - `shared/PersonCard.jsx` — initials avatar + name + role label + team chip; vacant state
-  - `shared/RoleCard.jsx` — role name + master role badge + filled-by or Vacant pill
-  - `shared/MemberTable.jsx` — rows: avatar | name | role | status; React.memo on row; keyed by id
-  - `shared/EdgeListDrawer.jsx` — inbound/outbound sections; edge type chip; empty state
-  - Verify: each renders standalone with sample data
+- [ ] **Task 1** — Expand DEFAULTS mock data in `TeamDetail.jsx`
+  - Add `servicesProvided[]` (3 entries, mixed slaStatus)
+  - Add `servicesConsumed[]` (2 entries)
+  - Add `serviceDependencies` (inbound + outbound arrays)
+  - Add `valueStreams[]` (2 entries with contribution type + businessOutcome)
+  - Add `processes[]` (3 entries)
+  - Add `okrs[]` (2 objectives with nested keyResults[])
+  - Add `kpis[]` (3 entries with contributionType + direction)
+  - Add `costCenters[]` (1 entry)
+  - Verify: no console errors, existing About + People tabs unaffected
 
-## Phase 2: Team Node
+  **CP1:** Existing tabs still render. ✓
 
-- [ ] **Task 3** — Team node: AboutTab + MembersTab
-  - Create `nodes/team/TeamDetail.jsx` with NodeDetailShell + 6 stat tiles:
-    1. Headcount (directMemberCount / totalMemberCount; sub: internal · external)
-    2. Vacancy rate (unfilled roles %)
-    3. Services (provided · consumed)
-    4. OKR health (% on track)
-    5. Annual cost (placeholder)
-    6. Team type (stream_aligned etc.)
-  - `nodes/team/tabs/AboutTab.jsx`: purpose, responsibilities, decision authorities table, workspace links, channels
-  - `nodes/team/tabs/MembersTab.jsx`: leads row (PersonCards) + member table (MemberTable); vacancy count badge on tab label
-  - Update root `TeamDetail.jsx` import or main.jsx import
-  - Verify: `npm run dev` → Team → About and Members fully rendered
+## Phase 2: Tab Components
 
-- [ ] **Task 4** — Team node: 8 remaining tab stubs
-  - `ServicesTab.jsx`, `ValueStreamsTab.jsx`, `CapabilitiesTab.jsx`, `OKRsKPIsTab.jsx`,
-    `GovernanceTab.jsx`, `RelationshipsTab.jsx`, `CostTab.jsx`, `ProcessesTab.jsx`
-  - Each: section header + "Content coming soon · §3.3" placeholder
-  - Verify: all 10 tabs navigable, no errors
+- [ ] **Task 2** — `tabs/PeopleTab.jsx` (replaces MembersTab)
+  - MetricsBar: 4 chips (total members, vacancies, internal, external)
+  - Team leads card (PersonCard list — same as current)
+  - Members & roles card (MemberTable — same as current)
+  - Internal/external split summary card
+  - Delete `MembersTab.jsx`; update import in `TeamDetail.jsx`
+  - Verify in browser: 4 sections visible; counts match mock data
 
-### Checkpoint A — Team visual review (browser)
-- [ ] Header matches spec §3.1
-- [ ] Stat strip: 6 tiles with correct labels
-- [ ] About and Members tabs match spec §3.3
-- [ ] No token violations (no hardcoded hex, no raw px font sizes)
+- [ ] **Task 3** — `tabs/ServicesTab.jsx` (new)
+  - MetricsBar: 3 chips (provided count, consumed count, SLA health)
+  - Provided services card (name, type pill, SLA string, status dot)
+  - Consumed services card (name, provider team, status dot)
+  - Dependency chain card (EdgeListDrawer)
+  - Verify in browser: 4 sections; dots coloured green/amber correctly
 
-## Phase 3: Person Node
+- [ ] **Task 4** — `tabs/DeliveryTab.jsx` (new)
+  - Value streams card (name, contribution pill, business outcome)
+  - Processes card (name, type, status pill)
+  - Verify in browser: both sections render
 
-- [ ] **Task 5** — Person node: full vertical slice
-  - `shared/ServiceCard.jsx` — name + type badge + status dot + owner chip
-  - `nodes/person/PersonDetail.jsx` with NodeDetailShell + 6 stat tiles:
-    1. Roles filled (count)
-    2. Teams (led · member)
-    3. Direct reports (span of control)
-    4. Supervisor (name chip)
-    5. Governance seats (count)
-    6. Communities (led · member)
-  - Fully built tabs: `AboutTab.jsx` (aboutMe, pronouns, profiles, social links, channels), `PositionsTab.jsx` (RoleCard + team per position), `TeamsCommunitiesTab.jsx`
-  - Stub tabs: `OrgViewTab.jsx`, `GovernanceTab.jsx`, `OKRsKPIsTab.jsx`, `LegalEntityTab.jsx`
-  - Wire into main.jsx People nav
-  - Verify: People nav → click person → all 7 tabs visible
+- [ ] **Task 5** — `tabs/PerformanceTab.jsx` (new)
+  - MetricsBar: 3 chips (OKR health %, KPI count, cost center count)
+  - OKRs card (objectives with nested key results, status pills, confidence score)
+  - KPIs card (name, category pill, contribution type pill, direction)
+  - Cost centers card (name, code mono, type pill, allocation %)
+  - Verify in browser: all sections render; status pills correctly coloured
 
-### Checkpoint B — Person smoke test (browser)
-- [ ] PersonDetail renders without layout breaks
-- [ ] About and Positions tabs fully rendered
-- [ ] No shared component imported from team/ folder
+  **CP3:** Tasks 3–5 each fully render before wiring. ✓
 
-## Phase 4: Role Node
+## Phase 3: Integration
 
-- [ ] **Task 6** — Role node: full vertical slice
-  - `nodes/role/RoleDetail.jsx` with NodeDetailShell + 6 stat tiles:
-    1. Status (Filled / Vacant / Interim chip)
-    2. Services owned (count)
-    3. Processes (owned · executed)
-    4. Cost centres owned (count)
-    5. OKRs (owned · on-track %)
-    6. Governance seats (count + chair/standing breakdown)
-  - Fully built tabs: `AboutTab.jsx`, `PersonTab.jsx` (PersonCard + vacancy date + prior holders timeline)
-  - Stub tabs: `TeamContextTab.jsx`, `OwnershipTab.jsx`, `GovernanceTab.jsx`, `SponsorshipsTab.jsx`, `DelegationsTab.jsx`
-  - Wire into main.jsx Roles nav
-  - Verify: Roles nav → click role → all 7 tabs visible
+- [ ] **Task 6** — Wire `TeamDetail.jsx`
+  - Remove imports: `MembersTab`, `TabStub`
+  - Add imports: `PeopleTab`, `ServicesTab`, `DeliveryTab`, `PerformanceTab`
+  - Replace 10-tab array with 5-tab array per SPEC.md
+  - Verify in browser:
+    - [ ] Exactly 5 tabs visible (About, People & roles, Services, Delivery, Performance)
+    - [ ] All 3 mock teams (default, t2, t3) load without errors
+    - [ ] Vacancy badge correct on People & roles tab
+    - [ ] No console errors or React key warnings
+    - [ ] No `TabStub` or `MembersTab` references remain in codebase
 
-### Checkpoint C — Three-node regression (browser)
-- [ ] Team → Person → Role navigation without layout breaks
-- [ ] Back navigation works from all three detail pages
-- [ ] No shared component imported from another node's folder
-- [ ] No list-index keys, no hardcoded hex values
-- [ ] No console errors or React key warnings
+  **CP4:** All acceptance criteria from SPEC.md met. ✓

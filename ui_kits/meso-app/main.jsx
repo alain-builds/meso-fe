@@ -6,7 +6,7 @@ import './app.css'
 import { Sidebar, Header }   from './Shell'
 import { Button, Modal, Toast, Card, Pill } from './Components'
 import { TeamsScreen, TEAMS } from './TeamsScreen'
-import { TeamDetail }          from './TeamDetail'
+import { TeamDetail }          from './nodes/team/TeamDetail'
 import { PersonDetail, PEOPLE } from './nodes/person/PersonDetail'
 import { RoleDetail,   ROLES  } from './nodes/role/RoleDetail'
 

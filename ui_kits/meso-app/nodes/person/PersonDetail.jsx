@@ -114,43 +114,6 @@ const getPerson = (person) =>
 const PersonDetail = ({ person, onTitleVisibilityChange }) => {
   const detail = getPerson(person)
 
-  const statTiles = [
-    {
-      id:    'roles',
-      label: 'Roles filled',
-      value: `${detail.rolesFilledCount}`,
-      sub:   detail.rolesFilledCount === 1 ? 'active role' : 'active roles',
-    },
-    {
-      id:    'teams',
-      label: 'Teams',
-      value: `${detail.teamsLedCount + detail.teamsMemberCount}`,
-      sub:   `${detail.teamsLedCount} led · ${detail.teamsMemberCount} member`,
-    },
-    {
-      id:    'reports',
-      label: 'Direct reports',
-      value: `${detail.directReports}`,
-      sub:   'span of control',
-    },
-    {
-      id:    'supervisor',
-      label: 'Supervisor',
-      value: detail.supervisor ?? '—',
-    },
-    {
-      id:    'governance',
-      label: 'Governance seats',
-      value: `${detail.governanceSeats}`,
-    },
-    {
-      id:    'communities',
-      label: 'Communities',
-      value: `${detail.communitiesLed + detail.communitiesMember}`,
-      sub:   `${detail.communitiesLed} led · ${detail.communitiesMember} member`,
-    },
-  ]
-
   const tabs = [
     { id: 'about',       label: 'About',            content: <AboutTab detail={detail} /> },
     { id: 'positions',   label: 'Positions',         content: <PositionsTab detail={detail} /> },
@@ -171,7 +134,6 @@ const PersonDetail = ({ person, onTitleVisibilityChange }) => {
       createdBy={detail.createdBy}
       updatedAt={detail.updatedAt}
       updatedBy={detail.updatedBy}
-      statTiles={statTiles}
       tabs={tabs}
       onTitleVisibilityChange={onTitleVisibilityChange}
     />

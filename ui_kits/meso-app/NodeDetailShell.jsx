@@ -20,66 +20,6 @@ const SIDE_TABS = [
 
 const micro = `${duration.micro} ${easing.out}`
 
-const SidebarStatGrid = ({ tiles }) => (
-  <div style={{
-    display:      'grid',
-    gridTemplateColumns: '1fr 1fr',
-    border:       `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    overflow:     'hidden',
-  }}>
-    {tiles.map((tile, i) => (
-      <div
-        key={tile.id}
-        style={{
-          padding:      `${spacing.m} ${spacing.m}`,
-          borderRight:  i % 2 === 0 ? `1px solid ${colors.border}` : 'none',
-          borderBottom: i < tiles.length - 2 ? `1px solid ${colors.border}` : 'none',
-        }}
-      >
-        <div style={{
-          fontFamily:   fontFamilies.body,
-          fontSize:     typeScale.labelB.size,
-          fontWeight:   typeScale.labelB.weight,
-          color:        colors.textTertiary,
-          marginBottom: spacing.xs,
-          whiteSpace:   'nowrap',
-          overflow:     'hidden',
-          textOverflow: 'ellipsis',
-        }}>
-          {tile.label}
-        </div>
-        <div style={{
-          fontFamily:    fontFamilies.display,
-          fontSize:      typeScale.h3.size,
-          fontWeight:    typeScale.h3.weight,
-          letterSpacing: typeScale.h3.letterSpacing,
-          color:         colors.ink,
-          lineHeight:    1.1,
-          marginBottom:  tile.sub ? spacing.xs : 0,
-          whiteSpace:    'nowrap',
-          overflow:      'hidden',
-          textOverflow:  'ellipsis',
-        }}>
-          {tile.value}
-        </div>
-        {tile.sub && (
-          <div style={{
-            fontFamily:   fontFamilies.body,
-            fontSize:     typeScale.labelB.size,
-            color:        colors.textSecondary,
-            whiteSpace:   'nowrap',
-            overflow:     'hidden',
-            textOverflow: 'ellipsis',
-          }}>
-            {tile.sub}
-          </div>
-        )}
-      </div>
-    ))}
-  </div>
-)
-
 const CollapsibleStub = ({ label, iconName }) => {
   const [open, setOpen] = useState(false)
   return (
@@ -363,7 +303,6 @@ const NodeDetailShell = ({
   createdBy,
   updatedAt,
   updatedBy,
-  statTiles = [],
   sidebarContent,
   tabs = [],
   onTitleVisibilityChange,
@@ -569,21 +508,6 @@ const NodeDetailShell = ({
           {/* Sidebar body */}
           {activeSideTab === 'details' ? (
             <div style={{ padding: spacing.m }}>
-              {statTiles.length > 0 && (
-                <section style={{ marginBottom: sidebarContent ? spacing.l : 0 }}>
-                  <div style={{
-                    fontFamily:    fontFamilies.body,
-                    fontSize:      typeScale.labelB.size,
-                    fontWeight:    600,
-                    color:         colors.textTertiary,
-                    letterSpacing: '0.04em',
-                    marginBottom:  spacing.s,
-                  }}>
-                    KEY METRICS
-                  </div>
-                  <SidebarStatGrid tiles={statTiles} />
-                </section>
-              )}
               {sidebarContent}
             </div>
           ) : (

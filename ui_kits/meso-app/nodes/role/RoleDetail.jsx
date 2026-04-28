@@ -152,45 +152,6 @@ const getRole = (role) =>
 const RoleDetail = ({ role, onTitleVisibilityChange }) => {
   const detail = getRole(role)
 
-  const statTiles = [
-    {
-      id:    'status',
-      label: 'Status',
-      value: detail.isVacant ? 'Vacant' : 'Filled',
-      sub:   detail.isVacant
-        ? `Since ${detail.vacantSince ?? '—'}`
-        : `by ${detail.filledByName ?? '—'}`,
-    },
-    {
-      id:    'services',
-      label: 'Services owned',
-      value: `${detail.servicesOwned}`,
-    },
-    {
-      id:    'processes',
-      label: 'Processes',
-      value: `${detail.processesOwned} owned`,
-      sub:   `${detail.processesExecuted} executed`,
-    },
-    {
-      id:    'cost-centres',
-      label: 'Cost centres',
-      value: `${detail.costCentresOwned}`,
-      sub:   'owned',
-    },
-    {
-      id:    'okrs',
-      label: 'OKRs',
-      value: `${detail.okrsOwned} owned`,
-      sub:   `${detail.okrsOnTrack} on track`,
-    },
-    {
-      id:    'governance',
-      label: 'Governance seats',
-      value: `${detail.governanceSeats}`,
-    },
-  ]
-
   const tabs = [
     { id: 'about',       label: 'About',       content: <AboutTab  detail={detail} /> },
     { id: 'person',      label: 'Person',       content: <PersonTab detail={detail} /> },
@@ -211,7 +172,6 @@ const RoleDetail = ({ role, onTitleVisibilityChange }) => {
       createdBy={detail.createdBy}
       updatedAt={detail.updatedAt}
       updatedBy={detail.updatedBy}
-      statTiles={statTiles}
       tabs={tabs}
       onTitleVisibilityChange={onTitleVisibilityChange}
     />
