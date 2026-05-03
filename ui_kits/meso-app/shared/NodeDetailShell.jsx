@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
-import { Icon, Button, Pill }           from './Components'
-import { CHROME_HEIGHT, micro }         from './shared/constants'
+import { Icon, Button, Pill }           from '../Components'
+import { CHROME_HEIGHT, micro }         from './constants'
 
 const STATUS_CONFIG = {
   active:   { variant: 'teal',    dot: 'live', label: 'Active',   pill: { background: colors.tealSoft, color: colors.teal          }, dotColor: colors.teal          },

@@ -1,6 +1,6 @@
 import { colors, fontFamilies, typeScale, spacing } from '@/tokens'
-import { Pill, Card, Skeleton }                    from './Components'
-import { micro }                                   from './shared/constants'
+import { Pill, Card, Skeleton }                    from '../../Components'
+import { micro }                                   from '../../shared/constants'
 
 const TEAMS = [
   { id: 't1', name: 'Platform Engineering',  owner: 'Sarah van der Berg', services: 12, roles: 8, status: 'active',   updated: '2 hours ago'  },
