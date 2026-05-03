@@ -26,9 +26,21 @@ const DEFAULTS = {
     'Run the on-call rotation and incident command for platform-level incidents.',
   ],
   decisionAuthorities: [
-    { title: 'Emergency infrastructure spend',  approver: 'CIO + team lead',  threshold: '> €25 k'   },
-    { title: 'Production deploy — off-hours',    approver: 'SRE Lead',         threshold: 'Any'        },
-    { title: 'Architecture changes',             approver: 'Staff Engineer',    threshold: 'Cross-team' },
+    { authorityType: 'decides',  description: 'Determines platform-wide architecture changes without prior approval.',              domainId: 'domain-engineering' },
+    { authorityType: 'approves', description: 'Signs off all production deployments affecting shared infrastructure.',              domainId: 'domain-engineering' },
+    { authorityType: 'advises',  description: 'Provides technical input on security posture decisions raised by other teams.',      domainId: 'domain-security'    },
+    { authorityType: 'ratifies', description: 'Confirms post-incident remediation plans before the incident is closed.',           domainId: 'domain-engineering' },
+  ],
+  domains: [
+    { id: 'domain-engineering', name: 'Engineering' },
+    { id: 'domain-security',    name: 'Security'    },
+    { id: 'domain-product',     name: 'Product'     },
+  ],
+  ownedCapabilities: [
+    { id: 'cap-platform-reliability', name: 'Platform Reliability', description: 'Uptime, incident response, and SLA attainment.',         parentCapabilityId: null,                       coOwners: [] },
+    { id: 'cap-observability',        name: 'Observability',        description: 'Telemetry, logging, and alerting infrastructure.',        parentCapabilityId: 'cap-platform-reliability', coOwners: [{ teamId: 't2', teamName: 'Data Platform' }] },
+    { id: 'cap-developer-tooling',    name: 'Developer Tooling',    description: 'Internal tools that accelerate delivery cycles.',         parentCapabilityId: null,                       coOwners: [] },
+    { id: 'cap-ci-cd',                name: 'CI/CD Pipeline',       description: 'Automated build, test, and deployment pipelines.',        parentCapabilityId: 'cap-developer-tooling',    coOwners: [] },
   ],
   workspaceLinks: [
     { label: 'Team handbook' },
@@ -76,8 +88,8 @@ const DEFAULTS = {
     outbound: [ { id: 'd2', name: 'Cloud Infrastructure', meta: 'CI/CD Platform depends on this' } ],
   },
   valueStreams: [
-    { id: 'vs1', name: 'Developer Experience', contribution: 'contributes', businessOutcome: 'Reduce time-to-deploy across all product teams' },
-    { id: 'vs2', name: 'Platform Reliability', contribution: 'owns',        businessOutcome: 'Maintain 99.9% platform SLA'                    },
+    { id: 'vs1', name: 'Developer Experience', businessOutcomes: ['Reduce time-to-deploy across all product teams.', 'Increase deployment frequency to a daily cadence.'] },
+    { id: 'vs2', name: 'Platform Reliability', businessOutcomes: ['Maintain 99.9% platform SLA across all hosted services.', 'Reduce mean time to recovery below one hour.'] },
   ],
   processes: [
     { id: 'p1', name: 'Incident Response',   type: 'operational', status: 'active' },

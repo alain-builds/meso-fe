@@ -26,6 +26,11 @@ export const colors = {
   amber:        '#C27C24',
   rose:         '#A84458',
 
+  // Soft chip backgrounds for authority type chips
+  blueSoft:     'rgba(58, 92, 168, 0.09)',
+  indigoSoft:   'rgba(88, 68, 186, 0.09)',
+  amberSoft:    'rgba(194, 124, 36, 0.09)',
+
   // Semantic
   error:        '#C0392B',
   success:      '#1A6B5C',
@@ -72,6 +77,9 @@ export const colorVars = {
   indigo:        'var(--indigo)',
   amber:         'var(--amber)',
   rose:          'var(--rose)',
+  blueSoft:      'var(--blue-soft)',
+  indigoSoft:    'var(--indigo-soft)',
+  amberSoft:     'var(--amber-soft)',
   error:         'var(--error)',
   success:       'var(--success)',
   border:        'var(--border)',

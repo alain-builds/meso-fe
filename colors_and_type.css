@@ -27,6 +27,11 @@
   --teal-soft:      rgba(26, 107, 92, 0.09);
   --teal-border:    rgba(26, 107, 92, 0.25);
 
+  /* Soft chip backgrounds — authority type chips */
+  --blue-soft:      rgba(58, 92, 168, 0.09);
+  --indigo-soft:    rgba(88, 68, 186, 0.09);
+  --amber-soft:     rgba(194, 124, 36, 0.09);
+
   /* Secondary accents — radial gradient BLOOMS ONLY
      Never flat fills, never text, never buttons.
      Always paired with teal. Max 2 colours per surface. */
@@ -136,6 +141,9 @@
     --text-tertiary:  rgba(244, 243, 240, 0.36);
     --teal-soft:      rgba(26, 107, 92, 0.20);
     --teal-border:    rgba(26, 107, 92, 0.30);
+    --blue-soft:      rgba(58, 92, 168, 0.18);
+    --indigo-soft:    rgba(88, 68, 186, 0.18);
+    --amber-soft:     rgba(194, 124, 36, 0.18);
     --border:         rgba(255, 255, 255, 0.07);
     --border-mid:     rgba(255, 255, 255, 0.12);
     --border-strong:  rgba(255, 255, 255, 0.20);
@@ -152,6 +160,9 @@
   --text-tertiary:  rgba(244, 243, 240, 0.36);
   --teal-soft:      rgba(26, 107, 92, 0.20);
   --teal-border:    rgba(26, 107, 92, 0.30);
+  --blue-soft:      rgba(58, 92, 168, 0.18);
+  --indigo-soft:    rgba(88, 68, 186, 0.18);
+  --amber-soft:     rgba(194, 124, 36, 0.18);
   --border:         rgba(255, 255, 255, 0.07);
   --border-mid:     rgba(255, 255, 255, 0.12);
   --border-strong:  rgba(255, 255, 255, 0.20);
