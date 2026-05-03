@@ -1,226 +1,549 @@
-# Team Detail — Five-Tab Redesign: Implementation Plan
+# AboutTab.jsx — Team Node — Implementation Plan
 
-**Spec:** `SPEC.md`  
-**Scope:** Replace the 10-tab stub layout with 5 purposeful, content-rich tabs on the Team detail page.  
-**Files touched:** `TeamDetail.jsx` (data + wiring), `tabs/PeopleTab.jsx` (replaces MembersTab), `tabs/ServicesTab.jsx` (new), `tabs/DeliveryTab.jsx` (new), `tabs/PerformanceTab.jsx` (new).
+**Spec:** Session conversation spec (spec for four blocks; delegation rules and contribution type removed)
+**Scope:** Rewrite `AboutTab.jsx` to implement Purpose, Responsibilities, Decision Authorities, and Capabilities Owned + Value Streams. Remove MetricsBar, WorkspaceLinks, Channels (covered by sidebar).
+
+**Files touched:**
+- `tokens/colors.ts`
+- `colors_and_type.css`
+- `ui_kits/meso-app/nodes/team/TeamDetail.jsx` (DEFAULTS mock data only)
+- `ui_kits/meso-app/nodes/team/tabs/AboutTab.jsx` (full rewrite)
 
 ---
 
 ## Dependency Graph
 
 ```
-Layer 0 — Existing building blocks (no changes needed)
-  shared/MetricsBar.jsx
-  shared/PersonCard.jsx
-  shared/MemberTable.jsx
-  shared/EdgeListDrawer.jsx
-  Components (Pill, Icon)
-  @/tokens
+Layer 0 — unchanged
+  @/tokens (colors, colorVars, fontFamilies, typeScale, spacing, radii, shadows)
+  Components.jsx (Icon — no longer used in new AboutTab; import can be removed)
 
-Layer 1 — Mock data expansion
-  TeamDetail.jsx (DEFAULTS object)
-  ↳ All tab components depend on the data fields defined here
+Layer 1 — token additions (T1)
+  tokens/colors.ts         ← add blueSoft, indigoSoft, amberSoft (raw values + colorVars entries)
+  colors_and_type.css      ← add --blue-soft, --indigo-soft, --amber-soft (light + both dark blocks)
+  ↳ Required by: CHIP_VARIANTS in T3 (Decision Authorities)
 
-Layer 2 — Tab components (each depends on Layer 0 + 1)
-  tabs/PeopleTab.jsx       ← replaces MembersTab.jsx
-  tabs/ServicesTab.jsx     ← new
-  tabs/DeliveryTab.jsx     ← new
-  tabs/PerformanceTab.jsx  ← new
+Layer 2 — mock data (T2)
+  TeamDetail.jsx DEFAULTS  ← fix decisionAuthorities shape, add domains[], ownedCapabilities[],
+                              update valueStreams to businessOutcomes[]
+  ↳ Required by: T3, T4, T5
 
-Layer 3 — Integration
-  TeamDetail.jsx (tabs array + imports)
-  ↳ Depends on all Layer 2 components existing
+Layer 3 — component blocks (T3 → T4 → T5, all in AboutTab.jsx)
+  T3: Decision Authorities block
+  T4: Capabilities Owned block
+  T5: Value Streams block
 ```
+
+T3/T4/T5 all modify the same file and are sequentially dependent. Do not parallelize.
 
 ---
 
-## Vertical Slices
+## Task 1 — Token additions
 
-Each task is a complete vertical slice — data shape → component → wired in. No horizontal layers.
+**Files:** `tokens/colors.ts`, `colors_and_type.css`
 
-### Task 1 — Expand mock data in TeamDetail.jsx
+**What:** Add three soft-variant tokens for authority chip backgrounds.
 
-**What:** Add all new data fields to the DEFAULTS object so tab components have something to render from the start.
+### tokens/colors.ts
 
-**Fields to add:**
+Add to `colors` object (raw light-mode values):
+```ts
+blueSoft:   'rgba(58, 92, 168, 0.09)',
+indigoSoft: 'rgba(88, 68, 186, 0.09)',
+amberSoft:  'rgba(194, 124, 36, 0.09)',
+```
+
+Add to `colorVars` object (CSS var references):
+```ts
+blueSoft:   'var(--blue-soft)',
+indigoSoft: 'var(--indigo-soft)',
+amberSoft:  'var(--amber-soft)',
+```
+
+### colors_and_type.css
+
+Add to `:root` (after `--teal-border`):
+```css
+--blue-soft:   rgba(58, 92, 168, 0.09);
+--indigo-soft: rgba(88, 68, 186, 0.09);
+--amber-soft:  rgba(194, 124, 36, 0.09);
+```
+
+Add to both `@media (prefers-color-scheme: dark)` and `[data-theme="dark"]` blocks (doubled alpha, matching tealSoft dark pattern):
+```css
+--blue-soft:   rgba(58, 92, 168, 0.18);
+--indigo-soft: rgba(88, 68, 186, 0.18);
+--amber-soft:  rgba(194, 124, 36, 0.18);
+```
+
+**Acceptance criteria:**
+- `colorVars.blueSoft === 'var(--blue-soft)'`
+- `colorVars.indigoSoft === 'var(--indigo-soft)'`
+- `colorVars.amberSoft === 'var(--amber-soft)'`
+- All 3 vars present in `:root` and both dark override blocks in `colors_and_type.css`
+
+**Verification:** `console.log(colorVars.blueSoft)` → `'var(--blue-soft)'`. Remove log after confirming.
+
+---
+
+## Task 2 — Mock data update (TeamDetail.jsx DEFAULTS)
+
+**File:** `ui_kits/meso-app/nodes/team/TeamDetail.jsx`
+
+**What:** Update DEFAULTS so all new blocks have well-shaped data. Only DEFAULTS changes — t2/t3 overrides inherit automatically via spread.
+
+### 1. Replace decisionAuthorities (currently `{title, approver, threshold}` shape)
+
 ```js
-// Services tab
-servicesProvided: [
-  { id: 's1', name: 'CI/CD Platform',      type: 'technical', sla: '99.5% uptime', slaStatus: 'green'  },
-  { id: 's2', name: 'Observability Stack', type: 'technical', sla: '99% uptime',   slaStatus: 'green'  },
-  { id: 's3', name: 'Dev Portal',          type: 'business',  sla: null,           slaStatus: 'amber'  },
-],
-servicesConsumed: [
-  { id: 'sc1', name: 'Identity & Access', providerTeam: 'Security',  slaStatus: 'green' },
-  { id: 'sc2', name: 'HR Data Feed',      providerTeam: 'People Ops', slaStatus: 'amber' },
-],
-serviceDependencies: {
-  inbound:  [ { id: 'd1', name: 'Feature Teams',       meta: 'depends on CI/CD Platform'          } ],
-  outbound: [ { id: 'd2', name: 'Cloud Infrastructure', meta: 'CI/CD Platform depends on this'    } ],
-},
-
-// Delivery tab
-valueStreams: [
-  { id: 'vs1', name: 'Developer Experience', contribution: 'contributes', businessOutcome: 'Reduce time-to-deploy across all product teams' },
-  { id: 'vs2', name: 'Platform Reliability', contribution: 'owns',        businessOutcome: 'Maintain 99.9% platform SLA' },
-],
-processes: [
-  { id: 'p1', name: 'Incident Response',  type: 'operational', status: 'active' },
-  { id: 'p2', name: 'Deployment Pipeline', type: 'technical',  status: 'active' },
-  { id: 'p3', name: 'Capacity Planning',  type: 'operational', status: 'active' },
-],
-
-// Performance tab
-okrs: [
+decisionAuthorities: [
   {
-    id: 'okr1', title: 'Achieve zero-downtime deployments', period: 'Q2-2025',
-    progressStatus: 'on_track', confidenceScore: 80,
-    keyResults: [
-      { id: 'kr1', title: 'Reduce failed deploys to < 0.5%',        progressStatus: 'on_track',  currentValue: 0.8,  targetValue: 0.5,  unit: '%'          },
-      { id: 'kr2', title: 'Deploy frequency ≥ 10 deploys/week',     progressStatus: 'on_track',  currentValue: 8,    targetValue: 10,   unit: 'deploys/wk' },
-    ],
+    authorityType: 'decides',
+    description:   'Determines platform-wide architecture changes without prior approval.',
+    domainId:      'domain-engineering',
   },
   {
-    id: 'okr2', title: 'Reduce platform operational toil by 40%', period: 'Q2-2025',
-    progressStatus: 'at_risk', confidenceScore: 55,
-    keyResults: [
-      { id: 'kr3', title: 'Automated toil < 20% of engineering time', progressStatus: 'at_risk', currentValue: 32, targetValue: 20, unit: '%' },
-    ],
+    authorityType: 'approves',
+    description:   'Signs off all production deployments affecting shared infrastructure.',
+    domainId:      'domain-engineering',
   },
-],
-kpis: [
-  { id: 'kpi1', name: 'MTTR',             category: 'operational', contributionType: 'owns',        direction: 'lower_is_better',  unit: 'hours'        },
-  { id: 'kpi2', name: 'Deploy frequency', category: 'operational', contributionType: 'contributes', direction: 'higher_is_better', unit: 'deploys/week' },
-  { id: 'kpi3', name: 'Infra cost / head', category: 'financial', contributionType: 'influences',  direction: 'lower_is_better',  unit: 'EUR'          },
-],
-costCenters: [
-  { id: 'cc1', name: 'Platform Engineering', code: 'CC-4720', type: 'operational', allocationPercent: 100 },
+  {
+    authorityType: 'advises',
+    description:   'Provides technical input on security posture decisions raised by other teams.',
+    domainId:      'domain-security',
+  },
+  {
+    authorityType: 'ratifies',
+    description:   'Confirms post-incident remediation plans before the incident is closed.',
+    domainId:      'domain-engineering',
+  },
 ],
 ```
 
-**Acceptance criteria:**
-- All fields present on DEFAULTS at runtime; no undefined errors when accessed in tab components
-- TEAM_DETAILS overrides for t2/t3 still work (they spread DEFAULTS, so new fields are inherited)
+### 2. Add domains array
 
-**Verification:** Open browser → Team detail → no console errors. Tab components will still show stubs until Task 2+.
+```js
+domains: [
+  { id: 'domain-engineering', name: 'Engineering' },
+  { id: 'domain-security',    name: 'Security'    },
+  { id: 'domain-product',     name: 'Product'     },
+],
+```
+
+### 3. Add ownedCapabilities array
+
+Two root capabilities; one with a child; one with a co-owner annotation:
+
+```js
+ownedCapabilities: [
+  {
+    id:                 'cap-platform-reliability',
+    name:               'Platform Reliability',
+    description:        'Uptime, incident response, and SLA attainment.',
+    parentCapabilityId: null,
+    coOwners:           [],
+  },
+  {
+    id:                 'cap-observability',
+    name:               'Observability',
+    description:        'Telemetry, logging, and alerting infrastructure.',
+    parentCapabilityId: 'cap-platform-reliability',
+    coOwners:           [{ teamId: 't2', teamName: 'Data Platform' }],
+  },
+  {
+    id:                 'cap-developer-tooling',
+    name:               'Developer Tooling',
+    description:        'Internal tools that accelerate delivery cycles.',
+    parentCapabilityId: null,
+    coOwners:           [],
+  },
+  {
+    id:                 'cap-ci-cd',
+    name:               'CI/CD Pipeline',
+    description:        'Automated build, test, and deployment pipelines.',
+    parentCapabilityId: 'cap-developer-tooling',
+    coOwners:           [],
+  },
+],
+```
+
+### 4. Update valueStreams to businessOutcomes[] shape
+
+```js
+valueStreams: [
+  {
+    id:               'vs1',
+    name:             'Developer Experience',
+    businessOutcomes: [
+      'Reduce time-to-deploy across all product teams.',
+      'Increase deployment frequency to a daily cadence.',
+    ],
+  },
+  {
+    id:               'vs2',
+    name:             'Platform Reliability',
+    businessOutcomes: [
+      'Maintain 99.9% platform SLA across all hosted services.',
+      'Reduce mean time to recovery below one hour.',
+    ],
+  },
+],
+```
+
+**Note:** Remove the old `businessOutcome` (singular) key — it is replaced by `businessOutcomes[]`.
+
+**Acceptance criteria:**
+- All 5 existing tabs still render without JS errors after this change
+- `detail.decisionAuthorities[0].authorityType === 'decides'`
+- `detail.domains.length === 3`
+- `detail.ownedCapabilities.length === 4`
+- `detail.valueStreams[0].businessOutcomes` is an array
+
+**Verification:** Browser → open any team → cycle through all 5 tabs → no console errors.
 
 ---
 
-### Task 2 — PeopleTab.jsx (rename and expand MembersTab)
+## Task 3 — Rewrite AboutTab.jsx: foundation + Decision Authorities
 
-**What:** Replace `MembersTab.jsx` with `PeopleTab.jsx`. Add a MetricsBar at the top and an internal/external split summary row below the member table.
+**File:** `ui_kits/meso-app/nodes/team/tabs/AboutTab.jsx`
 
-**Sections (top to bottom):**
-1. `MetricsBar` — 4 chips: total members, vacancies, internal count, external count
-2. Team leads card (existing PersonCard list — unchanged)
-3. Members & roles card (existing MemberTable — unchanged)
-4. Internal/external split summary row — a single card with two stats: "N internal · N external"
+**What:** Full file rewrite. Sets up the new file structure, fixes sub-component typography, removes MetricsBar/WorkspaceLinks/Channels, implements Purpose and Responsibilities (minor polish), implements Decision Authorities.
 
-**Key implementation notes:**
-- MetricsBar chips: `{ id: 'total', value: directMemberCount, label: 'members' }`, `{ id: 'vacancies', value: vacancyCount || 'None', label: 'vacancies' }`, `{ id: 'internal', value: directInternalMemberCount, label: 'internal' }`, `{ id: 'external', value: directExternalMemberCount, label: 'external' }`
-- Delete `MembersTab.jsx` after `PeopleTab.jsx` is verified
-- Update import in `TeamDetail.jsx` at the same time (do not leave a broken import)
+### File structure after this task
+
+```
+imports
+constants (AUTHORITY_ORDER, CHIP_VARIANTS)
+SectionHeading (fixed to labelA)
+SectionCard (switch colors.white → colorVars.white)
+AuthorityChip (new file-local sub-component)
+AboutTab
+  ├─ Purpose SectionCard
+  ├─ Responsibilities SectionCard
+  └─ Decision Authorities SectionCard
+```
+
+### Import line
+
+```js
+import { colors, colorVars, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
+```
+
+Remove `Icon` import — no longer used in this file.
+
+### SectionHeading — corrected typography
+
+Current stub uses `typeScale.labelB.size` (11px) + custom tracking. Spec requires `labelA`:
+
+```js
+const SectionHeading = ({ children }) => (
+  <div style={{
+    fontFamily:    fontFamilies.body,
+    fontSize:      typeScale.labelA.size,         // 10px
+    fontWeight:    typeScale.labelA.weight,        // 600
+    letterSpacing: typeScale.labelA.letterSpacing, // 0.10em
+    textTransform: typeScale.labelA.textTransform, // uppercase
+    color:         colorVars.textTertiary,
+    marginBottom:  spacing.m,
+  }}>
+    {children}
+  </div>
+)
+```
+
+### SectionCard — switch to colorVars
+
+```js
+const SectionCard = ({ children, style = {} }) => (
+  <div style={{
+    background:   colorVars.white,
+    borderRadius: radii.lg,
+    boxShadow:    shadows.sm,
+    padding:      spacing.l,
+    ...style,
+  }}>
+    {children}
+  </div>
+)
+```
+
+### Constants
+
+```js
+const AUTHORITY_ORDER = { decides: 0, approves: 1, advises: 2, ratifies: 3 }
+
+const CHIP_VARIANTS = {
+  decides:  { bg: colorVars.tealSoft,   text: colorVars.teal   },
+  approves: { bg: colorVars.blueSoft,   text: colorVars.blue   },
+  advises:  { bg: colorVars.indigoSoft, text: colorVars.indigo },
+  ratifies: { bg: colorVars.amberSoft,  text: colorVars.amber  },
+}
+```
+
+### AuthorityChip sub-component
+
+```js
+const AuthorityChip = ({ type }) => {
+  const v = CHIP_VARIANTS[type] ?? CHIP_VARIANTS.advises
+  return (
+    <span style={{
+      display:       'inline-flex',
+      alignItems:    'center',
+      padding:       '3px 8px',
+      borderRadius:  radii.sm,
+      background:    v.bg,
+      fontFamily:    fontFamilies.body,
+      fontSize:      typeScale.labelA.size,
+      fontWeight:    typeScale.labelA.weight,
+      letterSpacing: typeScale.labelA.letterSpacing,
+      textTransform: typeScale.labelA.textTransform,
+      color:         v.text,
+      flexShrink:    0,
+      width:         80,              // fixed-width column
+      justifyContent: 'center',
+    }}>
+      {type}
+    </span>
+  )
+}
+```
+
+### Decision Authorities block
+
+```js
+const sorted = [...detail.decisionAuthorities]
+  .sort((a, b) => AUTHORITY_ORDER[a.authorityType] - AUTHORITY_ORDER[b.authorityType])
+
+const domainsById = Object.fromEntries((detail.domains ?? []).map(d => [d.id, d]))
+
+// Inside SectionCard:
+{sorted.length === 0 ? (
+  <p style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colorVars.textTertiary, fontStyle: 'italic', margin: 0 }}>
+    No decision authorities have been defined.
+  </p>
+) : (
+  sorted.map((a, i) => (
+    <div
+      key={`${a.authorityType}-${a.domainId}`}
+      style={{
+        display:      'flex',
+        alignItems:   'center',
+        gap:          spacing.m,
+        paddingTop:   spacing.m,
+        paddingBottom: spacing.m,
+        borderBottom: i < sorted.length - 1 ? `1px solid ${colors.border}` : 'none',
+      }}
+    >
+      <AuthorityChip type={a.authorityType} />
+      <span style={{
+        flex:       1,
+        fontFamily: fontFamilies.body,
+        fontSize:   typeScale.ui.size,
+        fontWeight: typeScale.ui.weight,
+        color:      colors.textPrimary,
+      }}>
+        {a.description}
+      </span>
+      {domainsById[a.domainId] && (
+        <span style={{
+          flexShrink:   0,
+          padding:      '2px 6px',
+          borderRadius: radii.sm,
+          background:   colors.stone2,
+          fontFamily:   fontFamilies.body,
+          fontSize:     typeScale.labelB.size,
+          fontWeight:   typeScale.labelB.weight,
+          color:        colors.textSecondary,
+        }}>
+          {domainsById[a.domainId].name}
+        </span>
+      )}
+    </div>
+  ))
+)}
+```
+
+**Note on color mixing:** `AuthorityChip` uses `colorVars.*` (required — new CSS var tokens). Row separators and domain pill use `colors.*` (consistent with project convention; no dark-mode concern for these neutral tones in this phase).
+
+### Sections removed
+
+Remove entirely from the file:
+- `MetricsBar` import and chip calculation
+- Workspace links SectionCard
+- Channels SectionCard
+- The 2-column grid wrapper for links/channels
 
 **Acceptance criteria:**
-- MetricsBar shows correct counts for each mock team (t1, t2, t3)
-- Leads and member table render identically to the old MembersTab
-- Internal/external split summary displays correctly
-- No `MembersTab` import remains anywhere in the codebase
+- 4 authority rows render in order: Decides → Approves → Advises → Ratifies
+- Each chip shows correct background and text colour per `CHIP_VARIANTS`
+- Domain pill resolves to domain name (e.g. "Engineering", "Security")
+- Last row has no border-bottom
+- Empty state renders correctly when `decisionAuthorities` is `[]`
+- Purpose and Responsibilities blocks render visually correctly
+- No MetricsBar, WorkspaceLinks, or Channels sections remain
 
-**Verification:** Browser → Team detail → People & roles tab → all 4 sections visible.
+**Verification:** Browser → About tab → Purpose, Responsibilities, Decision Authorities all visible. 4 authority rows with coloured chips.
 
 ---
 
-### Task 3 — ServicesTab.jsx
+## Task 4 — Capabilities Owned block
 
-**What:** New tab component for the Services tab.
+**File:** `ui_kits/meso-app/nodes/team/tabs/AboutTab.jsx`
 
-**Sections (top to bottom):**
-1. `MetricsBar` — 3 chips: services provided count, services consumed count, SLA health ("N/N green")
-2. **Provided services** card — rows: service name (medium weight), type pill (technical / business / customer_facing), SLA string, SLA status dot (green/amber/red)
-3. **Consumed services** card — rows: service name, provider team label, SLA status dot
-4. **Dependency chain** card — reuse `EdgeListDrawer` component with `inbound` and `outbound` arrays from `detail.serviceDependencies`
+**What:** Add the Capabilities Owned `SectionCard` after Decision Authorities.
 
-**SLA status dot:** small coloured circle (8px, border-radius 50%) — green = `colors.teal`, amber = `colors.amber` (or fallback `#F59E0B`), red = `colors.danger` (or fallback `#EF4444`).
+### Tree construction (inside AboutTab)
+
+```js
+const ownedCapabilities = detail.ownedCapabilities ?? []
+const ownedIds = new Set(ownedCapabilities.map(c => c.id))
+const capRoots = ownedCapabilities.filter(
+  c => !c.parentCapabilityId || !ownedIds.has(c.parentCapabilityId)
+)
+const childrenOf = (id) => ownedCapabilities.filter(c => c.parentCapabilityId === id)
+```
+
+### CapabilityRow sub-component
+
+File-local, not memoised (tree is read-only, no UI state):
+
+```js
+const CapabilityRow = ({ cap, depth }) => {
+  const children = childrenOf(cap.id)   // childrenOf must be in scope
+  return (
+    <>
+      <div style={{
+        display:     'flex',
+        alignItems:  'baseline',
+        gap:         spacing.xs,
+        paddingLeft: depth * 20,          // 20px per level (structural constant)
+        paddingTop:  spacing.xs,
+        paddingBottom: spacing.xs,
+      }}>
+        <span style={{
+          fontFamily: fontFamilies.body,
+          fontSize:   typeScale.ui.size,
+          fontWeight: typeScale.ui.weight,
+          color:      colors.textPrimary,
+          flex:       1,
+        }}>
+          {cap.name}
+        </span>
+        {cap.coOwners?.length > 0 && (
+          <span style={{
+            fontFamily: fontFamilies.body,
+            fontSize:   typeScale.labelB.size,
+            color:      colors.textTertiary,
+            fontStyle:  'italic',
+            flexShrink: 0,
+          }}>
+            shared with {cap.coOwners.map(o => o.teamName).join(', ')}
+          </span>
+        )}
+      </div>
+      {depth < 3 && children.map(child => (
+        <CapabilityRow key={child.id} cap={child} depth={depth + 1} />
+      ))}
+    </>
+  )
+}
+```
+
+**Note:** `CapabilityRow` is defined inside `AboutTab` so it closes over `childrenOf`. This is intentional — it keeps the tree logic self-contained without prop-drilling.
+
+### Block rendering
+
+```jsx
+<SectionCard>
+  <SectionHeading>Capabilities owned</SectionHeading>
+  {ownedCapabilities.length === 0 ? (
+    <p style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colorVars.textTertiary, fontStyle: 'italic', margin: 0 }}>
+      No capabilities have been assigned to this team.
+    </p>
+  ) : (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {capRoots.map(root => (
+        <CapabilityRow key={root.id} cap={root} depth={0} />
+      ))}
+    </div>
+  )}
+</SectionCard>
+```
 
 **Acceptance criteria:**
-- Three sections render with correct mock data
-- Dependency chain correctly passes inbound/outbound to EdgeListDrawer
-- SLA status dots show correct colour per `slaStatus` value
-- Empty state ("No services.") shown when array is empty
+- `Platform Reliability` and `Developer Tooling` render at depth 0 (no indent)
+- `Observability` renders indented under `Platform Reliability`, shows "shared with Data Platform" annotation
+- `CI/CD Pipeline` renders indented under `Developer Tooling`, no annotation
+- Recursion stops at depth 3 (guard present; not reachable with current mock data)
+- Empty state renders when `ownedCapabilities` is `[]`
 
-**Verification:** Browser → Team detail → Services tab → 4 sections visible.
+**Verification:** Browser → About tab → Capabilities Owned section → tree structure correct, shared annotation visible.
 
 ---
 
-### Task 4 — DeliveryTab.jsx
+## Task 5 — Value Streams block
 
-**What:** New tab component for the Delivery tab.
+**File:** `ui_kits/meso-app/nodes/team/tabs/AboutTab.jsx`
 
-**Sections (top to bottom):**
-1. **Value streams** card — for each value stream: name (medium weight), contribution type pill (`owns` in teal, `contributes` in neutral), business outcome in secondary text below
-2. **Processes** card — for each process: name, type in secondary text, status pill (`active` / `pipeline` / `archived`)
+**What:** Add the Value Stream Contribution `SectionCard` after Capabilities Owned. Each value stream renders as a `stone`-background inset row within the outer card — no shadow-on-shadow nesting.
 
-**Acceptance criteria:**
-- Value streams section renders with contribution pill coloured by type (`owns` → teal, `contributes` → neutral)
-- Business outcome renders as secondary text below the name
-- Processes render with status pill
-- Empty states shown for both sections when arrays are empty
+### Block rendering
 
-**Verification:** Browser → Team detail → Delivery tab → both sections visible.
+```jsx
+<SectionCard>
+  <SectionHeading>Value stream contribution</SectionHeading>
+  {(detail.valueStreams ?? []).length === 0 ? (
+    <p style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colorVars.textTertiary, fontStyle: 'italic', margin: 0 }}>
+      This team has not been mapped to any value streams.
+    </p>
+  ) : (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.s }}>
+      {detail.valueStreams.map(vs => (
+        <div
+          key={vs.id}
+          style={{
+            background:   colors.stone,
+            borderRadius: radii.md,
+            padding:      spacing.m,
+          }}
+        >
+          <div style={{
+            fontFamily: fontFamilies.body,
+            fontSize:   typeScale.ui.size,
+            fontWeight: 600,
+            color:      colors.textPrimary,
+            marginBottom: spacing.xs,
+          }}>
+            {vs.name}
+          </div>
+          <p style={{
+            fontFamily:          fontFamilies.body,
+            fontSize:            typeScale.body.size,
+            lineHeight:          typeScale.body.lineHeight,
+            color:               colors.textSecondary,
+            overflow:            'hidden',
+            display:             '-webkit-box',
+            WebkitLineClamp:     2,
+            WebkitBoxOrient:     'vertical',
+            margin:              0,
+          }}>
+            {vs.businessOutcomes.slice(0, 2).join(' · ')}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
+</SectionCard>
+```
 
----
-
-### Task 5 — PerformanceTab.jsx
-
-**What:** New tab component for the Performance tab. Most complex — OKRs have nested key results.
-
-**Sections (top to bottom):**
-1. `MetricsBar` — 3 chips: OKR health ("N%"), KPI count, cost center count
-2. **OKRs owned** card — for each objective:
-   - Header row: title (medium weight), period badge (mono), progress status pill, confidence score (e.g. "80% confidence" in tertiary text)
-   - Nested key results list: title, progress status pill, progress value display ("0.8 / 0.5 %")
-   - Separator between objectives
-3. **KPIs** card — for each KPI: name, category pill, contribution type pill (`owns` teal, `contributes` neutral, `influences` neutral), direction indicator (arrow icon or label)
-4. **Cost centers** card — for each cost center: name + code in mono, type pill, allocation % right-aligned
-
-**Progress status pill colours:**
-- `on_track` → teal/green
-- `at_risk` → amber/warn
-- `off_track` → red/danger
-- `achieved` → teal
-- `not_started` / `missed` → neutral/grey
-
-**OKR health chip calculation:** percentage of OKRs (objectives) with `on_track` or `achieved` status.
-
-**Acceptance criteria:**
-- MetricsBar calculates OKR health dynamically from the `okrs` array
-- Each objective renders with at least one nested key result
-- Progress status pills use correct colour per status value
-- KPIs show all three metadata pills
-- Cost centers show code in mono font
-
-**Verification:** Browser → Team detail → Performance tab → all 4 sections visible.
-
----
-
-### Task 6 — Wire TeamDetail.jsx
-
-**What:** Update imports and tabs array. This is the integration step — do it last.
-
-**Changes:**
-1. Remove imports: `MembersTab`, `TabStub`
-2. Add imports: `PeopleTab`, `ServicesTab`, `DeliveryTab`, `PerformanceTab`
-3. Replace 10-tab array with 5-tab array (see SPEC.md Tab Array section)
-4. `vacancyCount` calculation remains the same — still used for the badge on People & roles tab
+**Design note:** Each VS row uses `colors.stone` (page background colour) against the outer card's `colors.white`. This creates a legible inset without shadow nesting. `radii.md` (not `radii.lg`) signals secondary hierarchy within the card.
 
 **Acceptance criteria:**
-- TeamDetail renders exactly 5 tabs
-- No `TabStub` or `MembersTab` import remains
-- All 3 mock team variants (default, t2, t3) load without errors
-- Vacancy badge still shows correct count on People & roles tab
+- 2 value stream rows render with correct names
+- Business outcomes join with `·` separator, clamped to 2 lines
+- Empty state renders when `valueStreams` is `[]`
+- No contribution type badge (removed per spec simplification)
 
-**Verification:** Browser → cycle through all 3 mock teams → all 5 tabs navigable, no console errors.
+**Verification:** Browser → About tab → Value Stream Contribution section → 2 rows visible, outcomes text truncates on long content.
 
 ---
 
@@ -228,31 +551,28 @@ costCenters: [
 
 | # | After task | What to verify |
 |---|---|---|
-| CP1 | Task 1 | Open any team → no JS errors, old tabs still work |
-| CP2 | Task 2 | People & roles tab: metrics bar, leads, table, split row all visible |
-| CP3 | Task 5 | Tasks 3–5 tabs each render fully before wiring |
-| CP4 | Task 6 | Exactly 5 tabs; all 3 mock teams load cleanly; no stale imports |
+| CP1 | T1 | `colorVars.blueSoft` resolves correctly; no broken imports anywhere |
+| CP2 | T2 | All 5 existing tabs render without console errors; new mock data shape confirmed |
+| CP3 | T3 | Purpose, Responsibilities, Decision Authorities all visible; 4 coloured chips in correct order |
+| CP4 | T4 | Capabilities tree renders with correct indent; co-owner annotation on Observability |
+| CP5 | T5 | Value stream rows visible; outcomes clamped to 2 lines |
 
 ---
 
 ## Build Order
 
 ```
-Task 1 (data)  →  Task 2 (PeopleTab)  →  Task 3 (ServicesTab)
-                                      →  Task 4 (DeliveryTab)
-                                      →  Task 5 (PerformanceTab)
-                                      →  Task 6 (wire TeamDetail)
+T1 (tokens)  →  T2 (mock data)  →  T3 (foundation + authorities)  →  T4 (capabilities)  →  T5 (value streams)
 ```
 
-Tasks 3, 4, and 5 are independent of each other — each depends only on Task 1 data being in place. Task 6 depends on all of them.
+T3 → T4 → T5 are sequential edits to the same file. Complete and verify each before starting the next.
 
 ---
 
-## Conventions (enforced)
+## Conventions for this work
 
-- Inline styles only — `@/tokens` imports, no CSS files
-- `SectionHeading` and `SectionCard` defined locally in each tab file (same pattern as `AboutTab.jsx`)
-- `colors.*` for all color references (project uses `colors.*` not `colorVars.*`)
-- `React.memo` on any list-row sub-component
-- Keys from stable `id` fields — never array index
-- No hardcoded hex values
+- `colorVars.*` used for the new chip tokens (CSS vars required; `blueSoft/indigoSoft/amberSoft` have no static value alternative). This is the first component file to use `colorVars.*` — consistent with CLAUDE.md intent. Other neutral color references in the same file continue to use `colors.*` to minimize unintended scope creep.
+- No new files — all sub-components (`AuthorityChip`, `CapabilityRow`) are file-local.
+- React keys from stable `id` fields — never array index.
+- No hardcoded hex or px font sizes — tokens only.
+- `CapabilityRow` is defined inside `AboutTab` to close over `childrenOf` without prop drilling. This is intentional and acceptable for a file-local recursive renderer.

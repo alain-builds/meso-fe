@@ -1,64 +1,53 @@
-# Team Detail Five-Tab Redesign — Task List
+# AboutTab.jsx — Team Node — Task List
 
-> Spec: `SPEC.md` · Plan: `tasks/plan.md`
+> Plan: `tasks/plan.md`
 
-## Phase 1: Data Foundation
+---
 
-- [ ] **Task 1** — Expand DEFAULTS mock data in `TeamDetail.jsx`
-  - Add `servicesProvided[]` (3 entries, mixed slaStatus)
-  - Add `servicesConsumed[]` (2 entries)
-  - Add `serviceDependencies` (inbound + outbound arrays)
-  - Add `valueStreams[]` (2 entries with contribution type + businessOutcome)
-  - Add `processes[]` (3 entries)
-  - Add `okrs[]` (2 objectives with nested keyResults[])
-  - Add `kpis[]` (3 entries with contributionType + direction)
-  - Add `costCenters[]` (1 entry)
-  - Verify: no console errors, existing About + People tabs unaffected
+## Phase 1: Foundation
 
-  **CP1:** Existing tabs still render. ✓
+- [x] **T1** — Add soft-variant color tokens
+  - `tokens/colors.ts`: add `blueSoft`, `indigoSoft`, `amberSoft` to `colors` (raw) and `colorVars` (CSS var refs)
+  - `colors_and_type.css`: add `--blue-soft`, `--indigo-soft`, `--amber-soft` to `:root` and both dark blocks
+  - Verify: `colorVars.blueSoft === 'var(--blue-soft)'`
 
-## Phase 2: Tab Components
+- [x] **T2** — Update DEFAULTS mock data in `TeamDetail.jsx`
+  - Replace `decisionAuthorities` with `{authorityType, description, domainId}` shape (4 entries: decides, approves, advises, ratifies)
+  - Add `domains: []` (3 entries)
+  - Add `ownedCapabilities: []` (4 entries — 2 roots, 2 children; 1 with co-owner)
+  - Update `valueStreams` to `businessOutcomes[]` shape (remove singular `businessOutcome`)
+  - Verify: all 5 existing tabs render without errors after change
 
-- [ ] **Task 2** — `tabs/PeopleTab.jsx` (replaces MembersTab)
-  - MetricsBar: 4 chips (total members, vacancies, internal, external)
-  - Team leads card (PersonCard list — same as current)
-  - Members & roles card (MemberTable — same as current)
-  - Internal/external split summary card
-  - Delete `MembersTab.jsx`; update import in `TeamDetail.jsx`
-  - Verify in browser: 4 sections visible; counts match mock data
+  **CP2:** All 5 tabs clean. ✓
 
-- [ ] **Task 3** — `tabs/ServicesTab.jsx` (new)
-  - MetricsBar: 3 chips (provided count, consumed count, SLA health)
-  - Provided services card (name, type pill, SLA string, status dot)
-  - Consumed services card (name, provider team, status dot)
-  - Dependency chain card (EdgeListDrawer)
-  - Verify in browser: 4 sections; dots coloured green/amber correctly
+---
 
-- [ ] **Task 4** — `tabs/DeliveryTab.jsx` (new)
-  - Value streams card (name, contribution pill, business outcome)
-  - Processes card (name, type, status pill)
-  - Verify in browser: both sections render
+## Phase 2: Component blocks (all in AboutTab.jsx)
 
-- [ ] **Task 5** — `tabs/PerformanceTab.jsx` (new)
-  - MetricsBar: 3 chips (OKR health %, KPI count, cost center count)
-  - OKRs card (objectives with nested key results, status pills, confidence score)
-  - KPIs card (name, category pill, contribution type pill, direction)
-  - Cost centers card (name, code mono, type pill, allocation %)
-  - Verify in browser: all sections render; status pills correctly coloured
+- [x] **T3** — Foundation + Decision Authorities block
+  - Add `colorVars` to import; remove `Icon` import
+  - Fix `SectionHeading` to `typeScale.labelA` (10px, 600, 0.10em, uppercase)
+  - Fix `SectionCard` to use `colorVars.white`
+  - Add `AUTHORITY_ORDER` and `CHIP_VARIANTS` constants
+  - Add `AuthorityChip` file-local sub-component (fixed 80px width, `colorVars.*` bg + text)
+  - Remove MetricsBar, WorkspaceLinks, Channels sections
+  - Implement Decision Authorities block: sort → chip | description | domain pill, row separator
+  - Verify: 4 rows in correct order; correct chip colours; domain pills resolve
 
-  **CP3:** Tasks 3–5 each fully render before wiring. ✓
+  **CP3:** Decision Authorities renders correctly. ✓
 
-## Phase 3: Integration
+- [x] **T4** — Capabilities Owned block
+  - Add tree-construction logic (`ownedIds`, `capRoots`, `childrenOf`) inside `AboutTab`
+  - Add `CapabilityRow` sub-component (defined inside `AboutTab`; closes over `childrenOf`)
+  - Implement Capabilities Owned `SectionCard` with tree rendering and empty state
+  - Verify: 2 root nodes, 2 children; Observability shows co-owner annotation; CI/CD Pipeline shows no annotation
 
-- [ ] **Task 6** — Wire `TeamDetail.jsx`
-  - Remove imports: `MembersTab`, `TabStub`
-  - Add imports: `PeopleTab`, `ServicesTab`, `DeliveryTab`, `PerformanceTab`
-  - Replace 10-tab array with 5-tab array per SPEC.md
-  - Verify in browser:
-    - [ ] Exactly 5 tabs visible (About, People & roles, Services, Delivery, Performance)
-    - [ ] All 3 mock teams (default, t2, t3) load without errors
-    - [ ] Vacancy badge correct on People & roles tab
-    - [ ] No console errors or React key warnings
-    - [ ] No `TabStub` or `MembersTab` references remain in codebase
+  **CP4:** Capabilities tree renders with correct indentation. ✓
 
-  **CP4:** All acceptance criteria from SPEC.md met. ✓
+- [x] **T5** — Value Streams block
+  - Implement Value Stream Contribution `SectionCard` (stone-background inset rows, not nested cards)
+  - `businessOutcomes.slice(0,2).join(' · ')` with 2-line clamp
+  - Empty state for empty array
+  - Verify: 2 rows visible; outcomes text clamps to 2 lines on overflow
+
+  **CP5:** Value stream rows render; outcomes clamped. ✓

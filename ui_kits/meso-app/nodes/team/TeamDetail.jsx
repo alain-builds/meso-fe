@@ -20,10 +20,22 @@ const DEFAULTS = {
   ],
   purpose:    'Responsible for the reliability, scalability, and operational excellence of the platform layer shared across all product teams.',
   responsibilities: [
-    'Own and operate the shared infrastructure layer (compute, networking, observability).',
-    'Define and enforce platform engineering standards across the organisation.',
-    'Provide internal developer tooling that accelerates other teams\' delivery cycles.',
-    'Run the on-call rotation and incident command for platform-level incidents.',
+    {
+      text:  'Own and operate the shared infrastructure layer (compute, networking, observability).',
+      roles: ['Engineering Manager', 'Staff Engineer', 'SRE Lead', 'Senior Engineer'],
+    },
+    {
+      text:  'Define and enforce platform engineering standards across the organisation.',
+      roles: ['Engineering Manager', 'Staff Engineer'],
+    },
+    {
+      text:  'Provide internal developer tooling that accelerates other teams\' delivery cycles.',
+      roles: ['Senior Engineer', 'Staff Engineer'],
+    },
+    {
+      text:  'Run the on-call rotation and incident command for platform-level incidents.',
+      roles: ['SRE Lead', 'On-call escalation'],
+    },
   ],
   decisionAuthorities: [
     { authorityType: 'decides',  description: 'Determines platform-wide architecture changes without prior approval.',              domainId: 'domain-engineering' },
