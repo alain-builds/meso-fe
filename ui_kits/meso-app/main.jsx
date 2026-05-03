@@ -11,6 +11,8 @@ import { PersonDetail }               from './nodes/person/PersonDetail'
 import { PeopleScreen }               from './nodes/person/PeopleScreen'
 import { RoleDetail }                 from './nodes/role/RoleDetail'
 import { RolesScreen }                from './nodes/role/RolesScreen'
+import { ValueStreamDetail }          from './nodes/value-stream/ValueStreamDetail'
+import { ValueStreamScreen }          from './nodes/value-stream/ValueStreamScreen'
 
 // ─── Empty panel for unimplemented sections ───────────────────────────────────
 
@@ -141,6 +143,14 @@ function App() {
           )}
           {active === 'roles' && openRole && (
             <RoleDetail role={openRole} onTitleVisibilityChange={setTitleVisible} />
+          )}
+
+          {/* Value Streams */}
+          {active === 'value-streams' && !openValueStream && (
+            <ValueStreamScreen onOpenValueStream={setOpenValueStream} />
+          )}
+          {active === 'value-streams' && openValueStream && (
+            <ValueStreamDetail valueStream={openValueStream} onTitleVisibilityChange={setTitleVisible} />
           )}
 
           {/* Everything else */}
