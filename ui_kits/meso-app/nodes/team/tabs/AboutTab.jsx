@@ -1,14 +1,14 @@
-import { colors, colorVars, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
+import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
 
 // ── Sort order for authority rows ─────────────────────────────────────────────
 
 const AUTHORITY_ORDER = { decides: 0, approves: 1, advises: 2, ratifies: 3 }
 
 const CHIP_VARIANTS = {
-  decides:  { bg: colorVars.tealSoft,   text: colorVars.teal   },
-  approves: { bg: colorVars.blueSoft,   text: colorVars.blue   },
-  advises:  { bg: colorVars.indigoSoft, text: colorVars.indigo },
-  ratifies: { bg: colorVars.amberSoft,  text: colorVars.amber  },
+  decides:  { bg: colors.tealSoft,   text: colors.teal   },
+  approves: { bg: colors.blueSoft,   text: colors.blue   },
+  advises:  { bg: colors.indigoSoft, text: colors.indigo },
+  ratifies: { bg: colors.amberSoft,  text: colors.amber  },
 }
 
 // ── Shared sub-components ─────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ const SectionHeading = ({ children }) => (
     fontWeight:    typeScale.labelA.weight,
     letterSpacing: typeScale.labelA.letterSpacing,
     textTransform: typeScale.labelA.textTransform,
-    color:         colorVars.textTertiary,
+    color:         colors.textTertiary,
     marginBottom:  spacing.m,
   }}>
     {children}
@@ -29,7 +29,7 @@ const SectionHeading = ({ children }) => (
 
 const SectionCard = ({ children, style = {} }) => (
   <div style={{
-    background:   colorVars.white,
+    background:   colors.white,
     borderRadius: radii.lg,
     boxShadow:    shadows.sm,
     padding:      spacing.l,
@@ -43,7 +43,7 @@ const EmptyState = ({ text }) => (
   <p style={{
     fontFamily: fontFamilies.body,
     fontSize:   typeScale.body.size,
-    color:      colorVars.textTertiary,
+    color:      colors.textTertiary,
     fontStyle:  'italic',
     margin:     0,
   }}>
@@ -77,55 +77,57 @@ const AuthorityChip = ({ type }) => {
   )
 }
 
+// ── Capability tree row ───────────────────────────────────────────────────────
+
+const CapabilityRow = ({ cap, depth, childrenOf }) => {
+  const children = childrenOf(cap.id)
+  return (
+    <>
+      <div style={{
+        display:       'flex',
+        alignItems:    'baseline',
+        gap:           spacing.xs,
+        paddingLeft:   depth * 20,
+        paddingTop:    spacing.xs,
+        paddingBottom: spacing.xs,
+      }}>
+        <span style={{
+          flex:       1,
+          fontFamily: fontFamilies.body,
+          fontSize:   typeScale.ui.size,
+          fontWeight: typeScale.ui.weight,
+          color:      colors.textPrimary,
+        }}>
+          {cap.name}
+        </span>
+        {cap.coOwners?.length > 0 && (
+          <span style={{
+            fontFamily: fontFamilies.body,
+            fontSize:   typeScale.labelB.size,
+            color:      colors.textTertiary,
+            fontStyle:  'italic',
+            flexShrink: 0,
+          }}>
+            shared with {cap.coOwners.map(o => o.teamName).join(', ')}
+          </span>
+        )}
+      </div>
+      {depth < 3 && children.map(child => (
+        <CapabilityRow key={child.id} cap={child} depth={depth + 1} childrenOf={childrenOf} />
+      ))}
+    </>
+  )
+}
+
 // ── AboutTab ──────────────────────────────────────────────────────────────────
 
 const AboutTab = ({ detail }) => {
-  const ownedCapabilities  = detail.ownedCapabilities ?? []
-  const ownedIds           = new Set(ownedCapabilities.map(c => c.id))
-  const capRoots           = ownedCapabilities.filter(
+  const ownedCapabilities = detail.ownedCapabilities ?? []
+  const ownedIds          = new Set(ownedCapabilities.map(c => c.id))
+  const capRoots          = ownedCapabilities.filter(
     c => !c.parentCapabilityId || !ownedIds.has(c.parentCapabilityId)
   )
   const childrenOf = (id) => ownedCapabilities.filter(c => c.parentCapabilityId === id)
-
-  const CapabilityRow = ({ cap, depth }) => {
-    const children = childrenOf(cap.id)
-    return (
-      <>
-        <div style={{
-          display:       'flex',
-          alignItems:    'baseline',
-          gap:           spacing.xs,
-          paddingLeft:   depth * 20,
-          paddingTop:    spacing.xs,
-          paddingBottom: spacing.xs,
-        }}>
-          <span style={{
-            flex:       1,
-            fontFamily: fontFamilies.body,
-            fontSize:   typeScale.ui.size,
-            fontWeight: typeScale.ui.weight,
-            color:      colors.textPrimary,
-          }}>
-            {cap.name}
-          </span>
-          {cap.coOwners?.length > 0 && (
-            <span style={{
-              fontFamily: fontFamilies.body,
-              fontSize:   typeScale.labelB.size,
-              color:      colors.textTertiary,
-              fontStyle:  'italic',
-              flexShrink: 0,
-            }}>
-              shared with {cap.coOwners.map(o => o.teamName).join(', ')}
-            </span>
-          )}
-        </div>
-        {depth < 3 && children.map(child => (
-          <CapabilityRow key={child.id} cap={child} depth={depth + 1} />
-        ))}
-      </>
-    )
-  }
 
   const sorted = [...(detail.decisionAuthorities ?? [])]
     .sort((a, b) => AUTHORITY_ORDER[a.authorityType] - AUTHORITY_ORDER[b.authorityType])
@@ -143,7 +145,7 @@ const AboutTab = ({ detail }) => {
             fontFamily: fontFamilies.body,
             fontSize:   typeScale.bodyLg.size,
             lineHeight: typeScale.bodyLg.lineHeight,
-            color:      colorVars.textPrimary,
+            color:      colors.textPrimary,
             margin:     0,
           }}>
             {detail.purpose}
@@ -240,7 +242,7 @@ const AboutTab = ({ detail }) => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {capRoots.map(root => (
-              <CapabilityRow key={root.id} cap={root} depth={0} />
+              <CapabilityRow key={root.id} cap={root} depth={0} childrenOf={childrenOf} />
             ))}
           </div>
         )}
