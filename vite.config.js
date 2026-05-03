@@ -13,4 +13,8 @@ export default defineConfig({
       '@/tokens': resolve(__dirname, 'tokens/index.ts'),
     },
   },
+  test: {
+    environment: 'node',
+    include: ['__tests__/**/*.test.js'],
+  },
 })

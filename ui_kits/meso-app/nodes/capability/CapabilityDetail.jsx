@@ -4,6 +4,7 @@ import { SubCapabilitiesTab } from './tabs/SubCapabilitiesTab'
 import { OwnersTab }          from './tabs/OwnersTab'
 import { ProcessesTab }       from './tabs/ProcessesTab'
 import { ValueStreamsTab }     from './tabs/ValueStreamsTab'
+import { deriveLevel }        from './capabilityUtils.js'
 
 const CAPABILITIES = [
   {
@@ -140,12 +141,6 @@ const DEFAULT_CAPABILITY = {
   valueStreams:       [],
 }
 
-const deriveLevel = (cap, all) => {
-  if (!cap.parentCapabilityId) return 'l1'
-  const parent = all.find(c => c.id === cap.parentCapabilityId)
-  if (!parent?.parentCapabilityId) return 'l2'
-  return 'l3'
-}
 
 const getCapability = (cap) => {
   const found = CAPABILITIES.find(c => c.id === cap.id) ?? { ...DEFAULT_CAPABILITY, name: cap.name }

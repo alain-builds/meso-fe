@@ -1,6 +1,7 @@
 import { colors, fontFamilies, typeScale, spacing, radii } from '@/tokens'
 import { Card, Pill }                                     from '../../Components'
 import { CAPABILITIES }                                   from './CapabilityDetail'
+import { deriveLevel }                                    from './capabilityUtils.js'
 
 const LEVEL_STYLES = {
   l1: { background: colors.tealSoft,   color: colors.teal          },
@@ -8,12 +9,6 @@ const LEVEL_STYLES = {
   l3: { background: colors.stone2,     color: colors.textTertiary   },
 }
 
-const deriveLevel = (cap, all) => {
-  if (!cap.parentCapabilityId) return 'l1'
-  const parent = all.find(c => c.id === cap.parentCapabilityId)
-  if (!parent?.parentCapabilityId) return 'l2'
-  return 'l3'
-}
 
 const LevelBadge = ({ level }) => {
   const s = LEVEL_STYLES[level] ?? LEVEL_STYLES.l1
