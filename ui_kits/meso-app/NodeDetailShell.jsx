@@ -367,7 +367,7 @@ const NodeDetailShell = ({
       )}
 
       {/* Two-column body */}
-      <div style={{ display: 'flex', gap: spacing.l, alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', gap: spacing.l, alignItems: 'stretch' }}>
 
         {/* Left: main content */}
         <div style={{ flex: '2 1 0', minWidth: 0 }}>
@@ -394,7 +394,7 @@ const NodeDetailShell = ({
           </nav>
 
           {/* Tab content */}
-          <div style={{ marginBottom: spacing.xl }}>
+          <div>
             {activeContent}
           </div>
         </div>
@@ -405,22 +405,19 @@ const NodeDetailShell = ({
           minWidth:     0,
           position:     'sticky',
           top:          CHROME_HEIGHT,
-          maxHeight:    `calc(100vh - ${CHROME_HEIGHT}px)`,
-          overflowY:    'auto',
+          alignSelf:    'flex-start',
           background:   colors.white,
           borderRadius: radii.lg,
           boxShadow:    shadows.sm,
           border:       `1px solid ${colors.border}`,
         }}>
 
-          {/* Sidebar tab bar */}
+          {/* Sidebar tab bar — outside the scroll container so the scrollbar starts below it */}
           <div style={{
             display:      'flex',
+            flexShrink:   0,
             borderBottom: `1px solid ${colors.border}`,
-            position:     'sticky',
-            top:          0,
             background:   colors.white,
-            zIndex:       1,
             borderRadius: `${radii.lg} ${radii.lg} 0 0`,
           }}>
             {SIDE_TABS.map(sideTab => (
@@ -450,7 +447,7 @@ const NodeDetailShell = ({
             ))}
           </div>
 
-          {/* Sidebar body */}
+          {/* Sidebar body — only this region scrolls */}
           {activeSideTab === 'details' ? (
             <div style={{ padding: spacing.m }}>
               {sidebarContent}

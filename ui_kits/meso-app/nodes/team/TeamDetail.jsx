@@ -1,6 +1,7 @@
-import { NodeDetailShell }   from '../../NodeDetailShell'
-import { NodeOverviewPanel } from '../../shared/NodeOverviewPanel'
-import { AboutTab }          from './tabs/AboutTab'
+import { NodeDetailShell }     from '../../NodeDetailShell'
+import { NodeOverviewPanel }   from '../../shared/NodeOverviewPanel'
+import { getTeamOverviewFields } from './teamOverviewConfig'
+import { AboutTab }            from './tabs/AboutTab'
 import { PeopleTab }         from './tabs/PeopleTab'
 import { ServicesTab }       from './tabs/ServicesTab'
 import { DeliveryTab }       from './tabs/DeliveryTab'
@@ -9,8 +10,14 @@ import { PerformanceTab }    from './tabs/PerformanceTab'
 // Extended mock detail data keyed by team id.
 // Falls back to DEFAULTS for teams not listed here.
 const DEFAULTS = {
-  teamType:   'stream_aligned',
-  domain:     'Engineering',
+  teamType:    'stream_aligned',
+  legalEntity: 'Acme Inc',
+  parent:      { id: 'org1', name: 'Engineering Org' },
+  children: [
+    { id: 'c1', name: 'SRE Team',         isTemporary: false },
+    { id: 'c2', name: 'Platform Tools',   isTemporary: false },
+    { id: 'c3', name: 'Cloud Migration',  isTemporary: true  },
+  ],
   purpose:    'Responsible for the reliability, scalability, and operational excellence of the platform layer shared across all product teams.',
   responsibilities: [
     'Own and operate the shared infrastructure layer (compute, networking, observability).',
@@ -112,8 +119,11 @@ const TEAM_DETAILS = {
   t2: {
     ...DEFAULTS,
     teamType: 'platform',
-    domain:   'Data',
-    purpose:  'Build and operate the data infrastructure powering analytics, reporting, and ML pipelines across Meso.',
+    parent:   { id: 'org1', name: 'Engineering Org' },
+    children: [
+      { id: 'c4', name: 'Analytics Pipeline', isTemporary: false },
+    ],
+    purpose: 'Build and operate the data infrastructure powering analytics, reporting, and ML pipelines across Meso.',
     leads: [
       { id: 'l1', name: 'Marco Lehmann', role: 'Engineering Manager', isVacant: false, isExternal: false },
     ],
@@ -134,9 +144,11 @@ const TEAM_DETAILS = {
   },
   t3: {
     ...DEFAULTS,
-    teamType: 'enabling',
-    domain:   'Security',
-    purpose:  'Enable all teams to deliver securely and compliantly by providing expertise, tooling, and governance frameworks.',
+    teamType:    'enabling',
+    legalEntity: 'Deloitte',
+    parent:      { id: 'org2', name: 'Risk & Compliance' },
+    children:    [],
+    purpose:     'Enable all teams to deliver securely and compliantly by providing expertise, tooling, and governance frameworks.',
     leads: [
       { id: 'l1', name: '', role: 'Head of Security & Compliance', isVacant: true, isExternal: false },
     ],
@@ -177,15 +189,6 @@ const TeamDetail = ({ team, onRemove, onTitleVisibilityChange }) => {
     { id: 'performance', label: 'Performance',    content: <PerformanceTab detail={detail} /> },
   ]
 
-  const overviewFields = [
-    { type: 'description', value: detail.purpose },
-    { type: 'text',   label: 'Domain',    value: detail.domain },
-    { type: 'pill',   label: 'Team type', value: detail.teamType.replace(/_/g, ' ') },
-    { type: 'person', label: 'Lead(s)',   people: detail.leads },
-    { type: 'date',   label: 'Last updated', date: detail.updatedAt, by: detail.updatedBy },
-    { type: 'links',  label: 'Workspace links', links: detail.workspaceLinks },
-  ]
-
   return (
     <NodeDetailShell
       nodeType="Team"
@@ -196,7 +199,7 @@ const TeamDetail = ({ team, onRemove, onTitleVisibilityChange }) => {
       createdBy={detail.createdBy}
       updatedAt={detail.updatedAt}
       updatedBy={detail.updatedBy}
-      sidebarContent={<NodeOverviewPanel name={team.name} fields={overviewFields} />}
+      sidebarContent={<NodeOverviewPanel fields={getTeamOverviewFields(team, detail)} />}
       tabs={tabs}
       onTitleVisibilityChange={onTitleVisibilityChange}
     />
