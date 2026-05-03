@@ -151,6 +151,28 @@
   }
 }
 
+/* Explicit light override — forces light mode regardless of OS preference */
+[data-theme="light"] {
+  --stone:          #F4F3F0;
+  --stone-2:        #ECEAE7;
+  --stone-3:        #DCDAD7;
+  --white:          #FFFFFF;
+  --ink:            #141412;
+  --ink-soft:       #1E1D1B;
+  --white-dim:      rgba(255, 255, 255, 0.38);
+  --text-primary:   #141412;
+  --text-secondary: #6B6966;
+  --text-tertiary:  #A8A6A2;
+  --teal-soft:      rgba(26, 107, 92, 0.09);
+  --teal-border:    rgba(26, 107, 92, 0.25);
+  --blue-soft:      rgba(58, 92, 168, 0.09);
+  --indigo-soft:    rgba(88, 68, 186, 0.09);
+  --amber-soft:     rgba(194, 124, 36, 0.09);
+  --border:         rgba(20, 20, 18, 0.09);
+  --border-mid:     rgba(20, 20, 18, 0.14);
+  --border-strong:  rgba(20, 20, 18, 0.22);
+}
+
 /* Explicit dark override (user-preferred) */
 [data-theme="dark"] {
   --stone:          #0F0F0D;

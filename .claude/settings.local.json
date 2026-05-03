@@ -13,7 +13,8 @@
       "Bash(npm install *)",
       "Bash(npx vite *)",
       "Read(//c/Users/AlainDunphy/Desktop/Meso App/**)",
-      "Read(//c/Users/AlainDunphy/Desktop/**)"
+      "Read(//c/Users/AlainDunphy/Desktop/**)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

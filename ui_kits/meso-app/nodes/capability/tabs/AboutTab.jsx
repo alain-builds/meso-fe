@@ -1,32 +1,6 @@
-import { colors, fontFamilies, typeScale, spacing, radii } from '@/tokens'
-import { SectionHeading, SectionCard, EmptyState }        from '../../../shared/SectionParts'
-
-const LEVEL_STYLES = {
-  l1: { background: colors.tealSoft,   color: colors.teal,          label: 'L1' },
-  l2: { background: colors.stone2,     color: colors.textSecondary,  label: 'L2' },
-  l3: { background: colors.stone2,     color: colors.textTertiary,   label: 'L3' },
-}
-
-const LevelBadge = ({ level }) => {
-  const s = LEVEL_STYLES[level] ?? LEVEL_STYLES.l1
-  return (
-    <span style={{
-      display:       'inline-flex',
-      alignItems:    'center',
-      padding:       '3px 10px',
-      borderRadius:  radii.sm,
-      background:    s.background,
-      fontFamily:    fontFamilies.body,
-      fontSize:      typeScale.labelA.size,
-      fontWeight:    600,
-      letterSpacing: '0.04em',
-      textTransform: 'uppercase',
-      color:         s.color,
-    }}>
-      {s.label}
-    </span>
-  )
-}
+import { colors, fontFamilies, typeScale, spacing } from '@/tokens'
+import { SectionHeading, SectionCard, EmptyState } from '../../../shared/SectionParts'
+import { LevelBadge }                              from '../LevelBadge'
 
 const AboutTab = ({ detail }) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.l }}>

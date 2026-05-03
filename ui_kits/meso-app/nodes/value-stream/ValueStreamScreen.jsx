@@ -1,6 +1,6 @@
-import { colors, fontFamilies, typeScale, spacing } from '@/tokens'
-import { Card, Pill }                              from '../../Components'
-import { VALUE_STREAMS }                           from './ValueStreamDetail'
+import { colorVars, colors, fontFamilies, typeScale, spacing } from '@/tokens'
+import { Card, Pill }                                          from '../../Components'
+import { VALUE_STREAMS }                                       from './valueStreamData.js'
 
 const ValueStreamScreen = ({ onOpenValueStream }) => (
   <div style={{ padding: `${spacing.xl} ${spacing.xl2} ${spacing.xl3}`, maxWidth: 1040 }}>
@@ -52,7 +52,7 @@ const ValueStreamScreen = ({ onOpenValueStream }) => (
               key={vs.id}
               onClick={() => onOpenValueStream(vs)}
               style={{ cursor: 'pointer' }}
-              onMouseEnter={e => e.currentTarget.style.background = colors.stone}
+              onMouseEnter={e => e.currentTarget.style.background = colorVars.stone}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               <td style={{ padding: '14px 20px', borderBottom: `1px solid ${colors.border}`, fontFamily: fontFamilies.body, fontSize: typeScale.ui.size, fontWeight: 500, color: colors.ink, whiteSpace: 'nowrap' }}>

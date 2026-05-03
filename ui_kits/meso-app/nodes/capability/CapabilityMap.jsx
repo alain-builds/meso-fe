@@ -1,14 +1,17 @@
-import { colorVars, colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
-import { micro } from '../../shared/constants'
+import { colorVars, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
+import { micro }                                                       from '../../shared/constants'
 
-// 220px is the agreed column width from the capability map spec.
 const COLUMN_W = '220px'
 
-const CapabilityMap = ({ capabilities, onOpenCapability }) => {
+const CapabilityMap = ({ capabilities, onOpenCapability, contentRef, onScroll, showL3 }) => {
   const l1s = capabilities.filter(c => !c.parentCapabilityId)
 
   return (
-    <div style={{ overflowX: 'auto', paddingBottom: spacing.xl }}>
+    <div
+      ref={contentRef}
+      onScroll={onScroll}
+      style={{ overflowX: 'auto', paddingBottom: spacing.xl }}
+    >
       <div style={{ display: 'flex', gap: spacing.m, alignItems: 'flex-start', width: 'max-content' }}>
 
         {l1s.map(l1 => {
@@ -16,38 +19,10 @@ const CapabilityMap = ({ capabilities, onOpenCapability }) => {
 
           return (
             <div key={l1.id} style={{ width: COLUMN_W, flexShrink: 0 }}>
-
-              {/* L1 header */}
-              <button
-                onClick={() => onOpenCapability(l1)}
-                style={{
-                  display:      'block',
-                  width:        '100%',
-                  padding:      spacing.m,
-                  background:   colorVars.teal,
-                  color:        colors.white,
-                  border:       'none',
-                  borderRadius: `${radii.md} ${radii.md} 0 0`,
-                  cursor:       'pointer',
-                  textAlign:    'left',
-                  fontFamily:   fontFamilies.display,
-                  fontSize:     typeScale.ui.size,
-                  fontWeight:   600,
-                  lineHeight:   1.3,
-                  transition:   `filter ${micro}`,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.88)' }}
-                onMouseLeave={e => { e.currentTarget.style.filter = 'none' }}
-              >
-                {l1.name}
-              </button>
-
-              {/* L2 cards */}
               <div style={{
                 display:       'flex',
                 flexDirection: 'column',
                 gap:           spacing.xs,
-                marginTop:     spacing.xs,
               }}>
                 {l2s.map(l2 => {
                   const l3s = capabilities.filter(c => c.parentCapabilityId === l2.id)
@@ -83,18 +58,21 @@ const CapabilityMap = ({ capabilities, onOpenCapability }) => {
                           border:     'none',
                           cursor:     'pointer',
                           textAlign:  'left',
-                          fontFamily: fontFamilies.body,
-                          fontSize:   typeScale.ui.size,
-                          fontWeight: 500,
-                          color:      colorVars.ink,
-                          lineHeight: 1.4,
+                          fontFamily:   fontFamilies.body,
+                          fontSize:     typeScale.ui.size,
+                          fontWeight:   500,
+                          color:        colorVars.ink,
+                          lineHeight:   1.4,
+                          whiteSpace:   'nowrap',
+                          overflow:     'hidden',
+                          textOverflow: 'ellipsis',
                         }}
                       >
                         {l2.name}
                       </button>
 
                       {/* L3 items */}
-                      {l3s.length > 0 && (
+                      {showL3 && l3s.length > 0 && (
                         <div style={{ borderTop: `1px solid ${colorVars.border}` }}>
                           {l3s.map((l3, i) => (
                             <button
@@ -114,6 +92,9 @@ const CapabilityMap = ({ capabilities, onOpenCapability }) => {
                                 color:        colorVars.textSecondary,
                                 lineHeight:   1.4,
                                 transition:   `background ${micro}`,
+                                whiteSpace:   'nowrap',
+                                overflow:     'hidden',
+                                textOverflow: 'ellipsis',
                               }}
                               onMouseEnter={e => { e.currentTarget.style.background = colorVars.stone }}
                               onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
