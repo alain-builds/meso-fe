@@ -1,12 +1,10 @@
-import { colors, fontFamilies, typeScale, spacing, radii, shadows, duration, easing } from '@/tokens'
-
-const micro = `${duration.micro} ${easing.out}`
+import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
+import { micro } from './constants'
 
 const MetricsBar = ({ chips }) => (
   <div style={{
     display:      'flex',
     background:   colors.white,
-    border:       `1px solid ${colors.border}`,
     borderRadius: radii.lg,
     boxShadow:    shadows.sm,
     overflow:     'hidden',

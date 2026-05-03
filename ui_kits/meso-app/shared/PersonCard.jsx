@@ -1,11 +1,7 @@
 import { memo } from 'react'
 import { colors, fontFamilies, typeScale, spacing, radii } from '@/tokens'
 import { Pill } from '../Components'
-
-const initials = (name) => {
-  if (!name) return '?'
-  return name.split(' ').slice(0, 2).map(s => s[0]?.toUpperCase() ?? '').join('')
-}
+import { initials } from './utils'
 
 const PersonCard = memo(({ name, roleLabel, teamLabel, isExternal = false, isVacant = false }) => (
   <div style={{

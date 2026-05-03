@@ -147,7 +147,7 @@ const DEFAULT_ROLE = {
 }
 
 const getRole = (role) =>
-  ROLES.find(r => r.roleName === role.name || r.id === role.id) ?? { ...DEFAULT_ROLE, roleName: role.name }
+  ROLES.find(r => r.id === role.id) ?? { ...DEFAULT_ROLE, roleName: role.name }
 
 const RoleDetail = ({ role, onTitleVisibilityChange }) => {
   const detail = getRole(role)

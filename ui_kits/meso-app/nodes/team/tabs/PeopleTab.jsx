@@ -1,32 +1,7 @@
-import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
-import { PersonCard } from '../../../shared/PersonCard'
-import { MemberTable } from '../../../shared/MemberTable'
-
-const SectionHeading = ({ children }) => (
-  <div style={{
-    fontFamily:    fontFamilies.body,
-    fontSize:      typeScale.labelB.size,
-    fontWeight:    600,
-    letterSpacing: '0.06em',
-    color:         colors.textTertiary,
-    textTransform: 'uppercase',
-    marginBottom:  spacing.m,
-  }}>
-    {children}
-  </div>
-)
-
-const SectionCard = ({ children, style }) => (
-  <div style={{
-    background:   colors.white,
-    borderRadius: radii.lg,
-    boxShadow:    shadows.sm,
-    padding:      spacing.l,
-    ...style,
-  }}>
-    {children}
-  </div>
-)
+import { colors, fontFamilies, typeScale, spacing, radii } from '@/tokens'
+import { PersonCard }                                     from '../../../shared/PersonCard'
+import { MemberTable }                                    from '../../../shared/MemberTable'
+import { SectionHeading, SectionCard, EmptyState }        from '../../../shared/SectionParts'
 
 const LegendRow = ({ dotColor, dashed, label, value }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
@@ -183,14 +158,7 @@ const PeopleTab = ({ detail }) => {
         <SectionCard style={{ flex: 1 }}>
           <SectionHeading>Team leads</SectionHeading>
           {(detail.leads ?? []).length === 0 ? (
-            <div style={{
-              fontFamily: fontFamilies.body,
-              fontSize:   typeScale.body.size,
-              color:      colors.textTertiary,
-              padding:    `${spacing.m} 0`,
-            }}>
-              No leads assigned.
-            </div>
+            <EmptyState text="No leads assigned." />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
               {(detail.leads ?? []).map((lead, i) => (

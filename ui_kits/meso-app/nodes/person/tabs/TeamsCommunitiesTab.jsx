@@ -1,38 +1,14 @@
-import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
-import { Pill } from '../../../Components'
-
-const SectionCard = ({ children }) => (
-  <div style={{
-    background:   colors.white,
-    borderRadius: radii.lg,
-    boxShadow:    shadows.sm,
-    padding:      spacing.l,
-  }}>
-    {children}
-  </div>
-)
-
-const SectionHeading = ({ children }) => (
-  <div style={{
-    fontFamily:    fontFamilies.body,
-    fontSize:      typeScale.labelB.size,
-    fontWeight:    600,
-    letterSpacing: '0.06em',
-    color:         colors.textTertiary,
-    textTransform: 'uppercase',
-    marginBottom:  spacing.m,
-  }}>
-    {children}
-  </div>
-)
+import { colors, fontFamilies, typeScale, spacing } from '@/tokens'
+import { Pill }                                    from '../../../Components'
+import { SectionHeading, SectionCard, EmptyState } from '../../../shared/SectionParts'
 
 const GroupRow = ({ item, isLast }) => (
   <div style={{
-    display:      'flex',
-    alignItems:   'center',
+    display:        'flex',
+    alignItems:     'center',
     justifyContent: 'space-between',
-    padding:      `${spacing.m} 0`,
-    borderBottom: isLast ? 'none' : `1px solid ${colors.border}`,
+    padding:        `${spacing.m} 0`,
+    borderBottom:   isLast ? 'none' : `1px solid ${colors.border}`,
   }}>
     <div>
       <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.ui.size, fontWeight: 500, color: colors.ink, marginBottom: '2px' }}>
@@ -57,7 +33,7 @@ const TeamsCommunitiesTab = ({ detail }) => (
     <SectionCard>
       <SectionHeading>Teams ({detail.teams.length})</SectionHeading>
       {detail.teams.length === 0
-        ? <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colors.textTertiary }}>Not a member of any team.</div>
+        ? <EmptyState text="Not a member of any team." />
         : detail.teams.map((t, i) => <GroupRow key={t.id} item={t} isLast={i === detail.teams.length - 1} />)
       }
     </SectionCard>
@@ -65,7 +41,7 @@ const TeamsCommunitiesTab = ({ detail }) => (
     <SectionCard>
       <SectionHeading>Communities ({detail.communities.length})</SectionHeading>
       {detail.communities.length === 0
-        ? <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colors.textTertiary }}>Not a member of any community.</div>
+        ? <EmptyState text="Not a member of any community." />
         : detail.communities.map((c, i) => <GroupRow key={c.id} item={c} isLast={i === detail.communities.length - 1} />)
       }
     </SectionCard>

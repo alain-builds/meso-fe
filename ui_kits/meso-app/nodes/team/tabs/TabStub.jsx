@@ -22,7 +22,7 @@ const TabStub = ({ section }) => (
       {section && (
         <div style={{
           fontFamily: fontFamilies.mono,
-          fontSize:   '11px',
+          fontSize:   typeScale.labelB.size,
           color:      colors.textTertiary,
         }}>
           {section}

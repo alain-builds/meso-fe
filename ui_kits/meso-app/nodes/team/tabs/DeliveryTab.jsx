@@ -1,31 +1,7 @@
 import { memo } from 'react'
-import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
-import { Pill } from '../../../Components'
-
-const SectionHeading = ({ children }) => (
-  <div style={{
-    fontFamily:    fontFamilies.body,
-    fontSize:      typeScale.labelB.size,
-    fontWeight:    600,
-    letterSpacing: '0.06em',
-    color:         colors.textTertiary,
-    textTransform: 'uppercase',
-    marginBottom:  spacing.m,
-  }}>
-    {children}
-  </div>
-)
-
-const SectionCard = ({ children }) => (
-  <div style={{
-    background:   colors.white,
-    borderRadius: radii.lg,
-    boxShadow:    shadows.sm,
-    padding:      spacing.l,
-  }}>
-    {children}
-  </div>
-)
+import { colors, fontFamilies, typeScale, spacing } from '@/tokens'
+import { Pill }                                    from '../../../Components'
+import { SectionHeading, SectionCard, EmptyState } from '../../../shared/SectionParts'
 
 const PROCESS_STATUS_PILL = {
   active:   { variant: 'teal',    dot: 'live', label: 'Active'   },
@@ -120,9 +96,7 @@ const DeliveryTab = ({ detail }) => {
       <SectionCard>
         <SectionHeading>Value streams</SectionHeading>
         {valueStreams.length === 0 ? (
-          <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colors.textTertiary }}>
-            No value streams linked.
-          </div>
+          <EmptyState text="No value streams linked." />
         ) : valueStreams.map((vs, i) => (
           <ValueStreamRow
             key={vs.id}
@@ -138,9 +112,7 @@ const DeliveryTab = ({ detail }) => {
       <SectionCard>
         <SectionHeading>Processes</SectionHeading>
         {processes.length === 0 ? (
-          <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colors.textTertiary }}>
-            No processes linked.
-          </div>
+          <EmptyState text="No processes linked." />
         ) : processes.map((p, i) => (
           <ProcessRow
             key={p.id}

@@ -1,32 +1,8 @@
 import { memo } from 'react'
-import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
-import { Pill }       from '../../../Components'
-import { MetricsBar } from '../../../shared/MetricsBar'
-
-const SectionHeading = ({ children }) => (
-  <div style={{
-    fontFamily:    fontFamilies.body,
-    fontSize:      typeScale.labelB.size,
-    fontWeight:    600,
-    letterSpacing: '0.06em',
-    color:         colors.textTertiary,
-    textTransform: 'uppercase',
-    marginBottom:  spacing.m,
-  }}>
-    {children}
-  </div>
-)
-
-const SectionCard = ({ children }) => (
-  <div style={{
-    background:   colors.white,
-    borderRadius: radii.lg,
-    boxShadow:    shadows.sm,
-    padding:      spacing.l,
-  }}>
-    {children}
-  </div>
-)
+import { colors, fontFamilies, typeScale, spacing } from '@/tokens'
+import { Pill }                                    from '../../../Components'
+import { MetricsBar }                              from '../../../shared/MetricsBar'
+import { SectionHeading, SectionCard, EmptyState } from '../../../shared/SectionParts'
 
 const PROGRESS_PILL = {
   on_track:    { variant: 'teal',    dot: 'live', label: 'On track'    },
@@ -257,9 +233,7 @@ const PerformanceTab = ({ detail }) => {
       <SectionCard>
         <SectionHeading>OKRs owned</SectionHeading>
         {okrs.length === 0 ? (
-          <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colors.textTertiary }}>
-            No OKRs assigned.
-          </div>
+          <EmptyState text="No OKRs assigned." />
         ) : okrs.map((okr, i) => (
           <OKRRow key={okr.id} okr={okr} last={i === okrs.length - 1} />
         ))}
@@ -269,9 +243,7 @@ const PerformanceTab = ({ detail }) => {
       <SectionCard>
         <SectionHeading>KPIs contributed to</SectionHeading>
         {kpis.length === 0 ? (
-          <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colors.textTertiary }}>
-            No KPIs linked.
-          </div>
+          <EmptyState text="No KPIs linked." />
         ) : kpis.map((kpi, i) => (
           <KPIRow key={kpi.id} kpi={kpi} last={i === kpis.length - 1} />
         ))}
@@ -281,9 +253,7 @@ const PerformanceTab = ({ detail }) => {
       <SectionCard>
         <SectionHeading>Cost center bookings</SectionHeading>
         {costCenters.length === 0 ? (
-          <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colors.textTertiary }}>
-            No cost centers booked.
-          </div>
+          <EmptyState text="No cost centers booked." />
         ) : costCenters.map((cc, i) => (
           <CostCenterRow key={cc.id} cc={cc} last={i === costCenters.length - 1} />
         ))}

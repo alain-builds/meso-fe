@@ -11,6 +11,7 @@
   /* Surfaces — three only */
   --stone:          #F4F3F0;     /* page background — never pure white */
   --stone-2:        #ECEAE7;     /* hover surfaces, skeletons */
+  --stone-3:        #DCDAD7;     /* button stone hover state */
   --white:          #FFFFFF;     /* card surface only */
   --ink:            #141412;     /* brand + primary text + dark surface */
   --ink-soft:       #1E1D1B;     /* toasts, dark card surface */

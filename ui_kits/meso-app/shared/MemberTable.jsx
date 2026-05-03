@@ -1,11 +1,8 @@
 import { memo, useState } from 'react'
-import { colors, fontFamilies, typeScale, spacing, radii } from '@/tokens'
+import { colors, fontFamilies, typeScale, spacing, radii, entityBadgeColors } from '@/tokens'
 import { Pill } from '../Components'
-
-const initials = (name) => {
-  if (!name) return '?'
-  return name.split(' ').slice(0, 2).map(s => s[0]?.toUpperCase() ?? '').join('')
-}
+import { initials } from './utils'
+import { micro } from './constants'
 
 // Fixed-pixel tracks assume a minimum panel width of ~640px; flex columns absorb narrower widths.
 const GRID = '1fr 1fr 80px 140px 80px 88px'
@@ -33,12 +30,10 @@ const getSortValue = (member, col) => {
 
 const ENTITY_BADGE_FONT_SIZE = '9px'
 
-// Deterministic color from company name — picks from a small dark palette
-const ENTITY_COLORS = ['#1a1a2e', '#0f3460', '#533483', '#1b4332', '#7c3626']
 const entityColor = (name) => {
   let hash = 0
   for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) & 0xffff
-  return ENTITY_COLORS[hash % ENTITY_COLORS.length]
+  return entityBadgeColors[hash % entityBadgeColors.length]
 }
 
 const CompanyBadge = ({ name }) => {
@@ -98,7 +93,7 @@ const HoverChip = ({ children, style }) => {
         borderRadius: radii.md,
         background:   hovered ? colors.stone : 'transparent',
         cursor:       'pointer',
-        transition:   'background 100ms ease',
+        transition:   `background ${micro}`,
         maxWidth:     'calc(100% + 16px)',
         overflow:     'hidden',
         ...style,
@@ -131,7 +126,7 @@ const MemberRow = memo(({ member }) => (
           display:        'flex',
           alignItems:     'center',
           justifyContent: 'center',
-          fontSize:       '10px',
+          fontSize:       typeScale.labelA.size,
           fontWeight:     600,
           fontFamily:     fontFamilies.body,
           border:         `1px dashed ${colors.borderMid}`,
@@ -163,7 +158,7 @@ const MemberRow = memo(({ member }) => (
           display:        'flex',
           alignItems:     'center',
           justifyContent: 'center',
-          fontSize:       '10px',
+          fontSize:       typeScale.labelA.size,
           fontWeight:     600,
           fontFamily:     fontFamilies.body,
           flexShrink:     0,
@@ -303,7 +298,7 @@ const MemberTable = ({ members = [], emptyMessage = 'No members yet.' }) => {
             {label}
             {sortable && (
               <span style={{
-                fontSize:   '10px',
+                fontSize:   typeScale.labelA.size,
                 color:      sort.col === key ? colors.ink : colors.borderMid,
                 lineHeight: 1,
               }}>

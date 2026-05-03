@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { colors, fontFamilies, typeScale, spacing, radii, shadows, duration, easing } from '@/tokens'
-import { Icon, Button, Pill } from './Components'
-
-// Must match Shell.jsx CHROME_HEIGHT — the sticky page header height.
-const CHROME_HEIGHT = 60
+import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
+import { Icon, Button, Pill }           from './Components'
+import { CHROME_HEIGHT, micro }         from './shared/constants'
 
 const STATUS_CONFIG = {
   active:   { variant: 'teal',    dot: 'live', label: 'Active',   pill: { background: colors.tealSoft, color: colors.teal          }, dotColor: colors.teal          },
@@ -17,7 +15,6 @@ const SIDE_TABS = [
   { id: 'comments', label: 'Comments' },
 ]
 
-const micro = `${duration.micro} ${easing.out}`
 
 
 const OverflowTabBar = ({ tabs, activeTab, onTabChange }) => {
@@ -104,7 +101,7 @@ const OverflowTabBar = ({ tabs, activeTab, onTabChange }) => {
       borderRadius:   radii.sm,
       background:     activeTab === tab.id ? colors.teal : colors.stone2,
       color:          activeTab === tab.id ? colors.white : colors.textSecondary,
-      fontSize:       '10px',
+      fontSize:       typeScale.labelA.size,
       fontWeight:     600,
       lineHeight:     1,
     }}>
@@ -232,7 +229,7 @@ const OverflowTabBar = ({ tabs, activeTab, onTabChange }) => {
                         borderRadius:   radii.sm,
                         background:     activeTab === tab.id ? colors.teal : colors.stone2,
                         color:          activeTab === tab.id ? colors.white : colors.textSecondary,
-                        fontSize:       '10px',
+                        fontSize:       typeScale.labelA.size,
                         fontWeight:     600,
                         lineHeight:     1,
                       }}>
@@ -320,7 +317,7 @@ const NodeDetailShell = ({
             style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
-              color: starred ? '#FBBF24' : colors.textTertiary, flexShrink: 0,
+              color: starred ? colors.amber : colors.textTertiary, flexShrink: 0,
               transition: `color ${micro}`,
             }}
             onMouseEnter={e => { if (!starred) e.currentTarget.style.color = colors.textSecondary }}
@@ -351,7 +348,7 @@ const NodeDetailShell = ({
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 4,
             padding: '1px 6px', borderRadius: radii.sm, flexShrink: 0,
-            fontSize: '10px', fontWeight: 500,
+            fontSize: typeScale.labelA.size, fontWeight: 500,
             ...statusCfg.pill,
           }}>
             {statusCfg.dot && (
@@ -409,7 +406,6 @@ const NodeDetailShell = ({
           background:   colors.white,
           borderRadius: radii.lg,
           boxShadow:    shadows.sm,
-          border:       `1px solid ${colors.border}`,
         }}>
 
           {/* Sidebar tab bar — outside the scroll container so the scrollbar starts below it */}

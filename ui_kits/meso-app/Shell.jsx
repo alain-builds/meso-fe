@@ -1,12 +1,12 @@
 import { memo, useState } from 'react'
-import { colors, duration, easing, radii, fontFamilies, typeScale, spacing } from '@/tokens'
-import { Icon, Button } from './Components'
+import { colors, radii, fontFamilies, typeScale, spacing } from '@/tokens'
+import { Icon, Button }                  from './Components'
+import { CHROME_HEIGHT, micro, medium }  from './shared/constants'
 
 // Dimension constants that don't map to the spacing scale — derived from the
 // collapsed sidebar width (60px) which centers a 20px icon with 20px padding each side.
 const SIDEBAR_COLLAPSED  = 60
 const SIDEBAR_EXPANDED   = 200
-const CHROME_HEIGHT      = 60   // shared by the logo strip and page header
 const NAV_PAD_X          = 20   // horizontal padding; centers icon in collapsed sidebar
 const NAV_INDENT_SUB     = 32   // left indent for sub-items when expanded
 const LOGO_WORDMARK_SIZE = '22px'
@@ -40,9 +40,6 @@ const baseButtonStyle = {
   cursor: 'pointer', padding: 0, width: '100%',
   font: 'inherit', textAlign: 'left',
 }
-
-const micro  = `${duration.micro} ${easing.out}`
-const medium = `${duration.medium} ${easing.out}`
 
 const NavItem = memo(({ item, isActive, onNavigate, expanded, sub = false }) => (
   <button
@@ -279,7 +276,7 @@ const Header = ({
             {breadcrumbs.map((crumb, i) => {
               const isLast = i === breadcrumbs.length - 1
               return (
-                <span key={i} style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
+                <span key={crumb.label} style={{ display: 'flex', alignItems: 'center', gap: spacing.s }}>
                   {i > 0 && (
                     <span style={{ color: colors.textTertiary, userSelect: 'none' }}>/</span>
                   )}

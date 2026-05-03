@@ -4,10 +4,13 @@ export const colors = {
   // Surfaces
   stone:        '#F4F3F0',
   stone2:       '#ECEAE7',
+  stone3:       '#DCDAD7', // button stone hover state
   white:        '#FFFFFF',
   ink:          '#141412',
   inkSoft:      '#1E1D1B',
   whiteDim:     'rgba(255, 255, 255, 0.38)', // muted text/labels on ink surfaces
+  stoneText:    'rgba(244, 243, 240, 0.92)',  // primary text on dark ink surfaces
+  stoneFaint:   'rgba(244, 243, 240, 0.40)',  // muted icons/text on dark ink surfaces
 
   // Text hierarchy
   textPrimary:   '#141412',
@@ -62,6 +65,7 @@ export const darkColors = {
 export const colorVars = {
   stone:         'var(--stone)',
   stone2:        'var(--stone-2)',
+  stone3:        'var(--stone-3)',
   white:         'var(--white)',
   ink:           'var(--ink)',
   inkSoft:       'var(--ink-soft)',
@@ -86,6 +90,9 @@ export const colorVars = {
   borderMid:     'var(--border-mid)',
   borderStrong:  'var(--border-strong)',
 } as const
+
+// Deterministic palette for entity (company) badge backgrounds — algorithm-based, not semantic.
+export const entityBadgeColors = ['#1a1a2e', '#0f3460', '#533483', '#1b4332', '#7c3626'] as const
 
 export type ColorToken    = keyof typeof colors
 export type ColorVar      = keyof typeof colorVars

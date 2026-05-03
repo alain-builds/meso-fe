@@ -109,7 +109,7 @@ const DEFAULT_PERSON = {
 }
 
 const getPerson = (person) =>
-  PEOPLE.find(p => p.name === person.name) ?? { ...DEFAULT_PERSON, ...person }
+  PEOPLE.find(p => p.id === person.id) ?? { ...DEFAULT_PERSON, ...person }
 
 const PersonDetail = ({ person, onTitleVisibilityChange }) => {
   const detail = getPerson(person)

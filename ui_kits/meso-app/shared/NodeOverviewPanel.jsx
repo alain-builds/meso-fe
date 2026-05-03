@@ -1,15 +1,17 @@
-import { Fragment, useState }                                              from 'react'
-import { colors, fontFamilies, typeScale, spacing, radii, duration, easing } from '@/tokens'
-import { Icon }                                                               from '../Components'
+import { Fragment, useState }                                           from 'react'
+import { colors, fontFamilies, typeScale, spacing, radii }              from '@/tokens'
+import { Icon }                                                          from '../Components'
+import { micro }                                                         from './constants'
+import { initials }                                                      from './utils'
 
 // ── Shared style constants ────────────────────────────────────────────────────
 
 const SECTION_LABEL_STYLE = {
   fontFamily:    fontFamilies.body,
-  fontSize:      '10px',
-  fontWeight:    600,
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
+  fontSize:      typeScale.labelA.size,
+  fontWeight:    typeScale.labelA.weight,
+  letterSpacing: typeScale.labelA.letterSpacing,
+  textTransform: typeScale.labelA.textTransform,
   color:         colors.textTertiary,
   lineHeight:    1.4,
 }
@@ -40,7 +42,7 @@ const hoverRowStyle = (hovered) => ({
   borderRadius: radii.md,
   background:   hovered ? colors.stone2 : 'transparent',
   cursor:       'pointer',
-  transition:   `background ${duration.micro} ${easing.out}`,
+  transition:   `background ${micro}`,
 })
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -94,13 +96,6 @@ const PillChip = ({ value, variant = 'neutral' }) => {
 
 // ── Interactive row components ────────────────────────────────────────────────
 
-const initials = (name) => {
-  if (!name) return '?'
-  const parts = name.trim().split(/\s+/)
-  if (parts.length === 1) return parts[0][0].toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
-
 const PersonRow = ({ person }) => {
   const [hovered, setHovered] = useState(false)
   const interactive = !person.isVacant
@@ -121,7 +116,7 @@ const PersonRow = ({ person }) => {
         alignItems:     'center',
         justifyContent: 'center',
         fontFamily:     fontFamilies.body,
-        fontSize:       '11px',
+        fontSize:       typeScale.labelB.size,
         fontWeight:     600,
         color:          person.isVacant ? colors.textTertiary : colors.teal,
       }}>
@@ -206,7 +201,7 @@ const ValueLinkCell = ({ value }) => {
         borderRadius: radii.md,
         background:   hovered ? colors.stone2 : 'transparent',
         cursor:       'pointer',
-        transition:   `background ${duration.micro} ${easing.out}`,
+        transition:   `background ${micro}`,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -233,7 +228,7 @@ const ChannelChip = ({ channel }) => {
         fontWeight:   500,
         color:        hovered ? colors.teal : colors.textSecondary,
         cursor:       'pointer',
-        transition:   `border-color ${duration.micro} ${easing.out}, background ${duration.micro} ${easing.out}, color ${duration.micro} ${easing.out}`,
+        transition:   `border-color ${micro}, background ${micro}, color ${micro}`,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -285,11 +280,11 @@ const renderField = (field, i) => {
         <div key={i} style={{
           gridColumn:    'span 2',
           fontFamily:    fontFamilies.display,
-          fontSize:      '18px',
+          fontSize:      typeScale.h3.size,
           fontWeight:    700,
-          letterSpacing: '-0.4px',
+          letterSpacing: typeScale.h3.letterSpacing,
           color:         colors.ink,
-          lineHeight:    1.2,
+          lineHeight:    typeScale.h3.lineHeight,
         }}>
           {field.value}
         </div>
@@ -542,7 +537,7 @@ const NodeOverviewPanel = ({ fields = [] }) => {
                 style={{
                   flexShrink: 0,
                   transform:  isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-                  transition: `transform ${duration.micro} ${easing.out}`,
+                  transition: `transform ${micro}`,
                 }}
               />
               <span style={SECTION_LABEL_STYLE}>{group.section.label}</span>

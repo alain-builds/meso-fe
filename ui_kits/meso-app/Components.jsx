@@ -4,6 +4,7 @@ import { colors, duration, easing, radii, shadows as tokenShadows, fontFamilies 
 const Icon = ({ name, size = 20, color = 'currentColor', strokeWidth = 1.5, style = {} }) => {
   const paths = {
     'layout-grid':      <><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
+    'pencil':           <><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></>,
     'users':            <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>,
     'users-round':      <><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></>,
     'id-card':          <><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></>,
@@ -70,7 +71,7 @@ const Button = ({ children, variant = 'primary', size = 'md', icon, onClick, dis
         if (!disabled && variant === 'primary')   e.currentTarget.style.opacity = '0.88'
         if (!disabled && variant === 'secondary') { e.currentTarget.style.borderColor = colors.borderStrong; e.currentTarget.style.background = colors.stone2 }
         if (!disabled && variant === 'teal')      e.currentTarget.style.opacity = '0.9'
-        if (!disabled && variant === 'stone')     e.currentTarget.style.background = '#DCDAD7'
+        if (!disabled && variant === 'stone')     e.currentTarget.style.background = colors.stone3
       }}
       onMouseLeave={e => {
         e.currentTarget.style.opacity = disabled ? '0.4' : '1'
@@ -159,10 +160,17 @@ const Card = ({ children, level = 1, padding = 36, style = {}, onClick, hoverabl
 
 const Modal = ({ open, title, children, footer, onClose }) => {
   if (!open) return null
+  const titleId = 'modal-title'
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, animation: `fade 200ms ${easing.out}` }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: colors.white, borderRadius: radii.xl, boxShadow: tokenShadows.lg, padding: 40, maxWidth: 480, width: '90%', animation: `pop 200ms ${easing.out}` }}>
-        {title && <div style={{ fontFamily: fontFamilies.display, fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', color: colors.ink, marginBottom: 10 }}>{title}</div>}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        onClick={e => e.stopPropagation()}
+        style={{ background: colors.white, borderRadius: radii.xl, boxShadow: tokenShadows.lg, padding: 40, maxWidth: 480, width: '90%', animation: `pop 200ms ${easing.out}` }}
+      >
+        {title && <div id={titleId} style={{ fontFamily: fontFamilies.display, fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', color: colors.ink, marginBottom: 10 }}>{title}</div>}
         <div style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 1.65, marginBottom: 28 }}>{children}</div>
         {footer && <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>{footer}</div>}
       </div>
@@ -172,17 +180,17 @@ const Modal = ({ open, title, children, footer, onClose }) => {
 
 const Toast = ({ kind = 'success', msg, onDismiss }) => {
   const kinds = {
-    success: { c: '#2A9D87', name: 'check-check' },
-    error:   { c: '#E05849', name: 'alert-triangle' },
-    info:    { c: '#8BA9E3', name: 'info' },
+    success: { c: colors.teal,  name: 'check-check'   },
+    error:   { c: colors.error, name: 'alert-triangle' },
+    info:    { c: colors.blue,  name: 'info'           },
   }
   const k = kinds[kind]
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', background: colors.inkSoft, borderRadius: radii.lg, boxShadow: tokenShadows.lg, maxWidth: 400, animation: `slide 250ms ${easing.out}` }}>
+    <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', background: colors.inkSoft, borderRadius: radii.lg, boxShadow: tokenShadows.lg, maxWidth: 400, animation: `slide 250ms ${easing.out}` }}>
       <Icon name={k.name} size={16} color={k.c} strokeWidth={2} />
-      <div style={{ fontSize: 13, color: 'rgba(244,243,240,0.92)', lineHeight: 1.45, flex: 1 }}>{msg}</div>
+      <div style={{ fontSize: 13, color: colors.stoneText, lineHeight: 1.45, flex: 1 }}>{msg}</div>
       <div onClick={onDismiss} style={{ cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
-        <Icon name="x" size={12} color="rgba(244,243,240,0.4)" strokeWidth={2.25} />
+        <Icon name="x" size={12} color={colors.stoneFaint} strokeWidth={2.25} />
       </div>
     </div>
   )

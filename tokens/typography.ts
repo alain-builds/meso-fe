@@ -16,6 +16,12 @@ export const fontFamilyVars = {
 // Each entry maps to a semantic CSS class in colors_and_type.css (.t-hero, .t-h1, …)
 
 export const typeScale = {
+  eyebrow: {
+    family:        'display' as const,
+    size:          '12px',
+    weight:        600,
+    letterSpacing: '-0.2px',
+  },
   hero: {
     family:        'display' as const,
     size:          '84px',

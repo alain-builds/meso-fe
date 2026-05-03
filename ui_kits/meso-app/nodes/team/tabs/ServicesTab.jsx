@@ -1,33 +1,9 @@
 import { memo } from 'react'
-import { colors, fontFamilies, typeScale, spacing, radii, shadows } from '@/tokens'
-import { Pill }            from '../../../Components'
-import { MetricsBar }      from '../../../shared/MetricsBar'
-import { EdgeListDrawer }  from '../../../shared/EdgeListDrawer'
-
-const SectionHeading = ({ children }) => (
-  <div style={{
-    fontFamily:    fontFamilies.body,
-    fontSize:      typeScale.labelB.size,
-    fontWeight:    600,
-    letterSpacing: '0.06em',
-    color:         colors.textTertiary,
-    textTransform: 'uppercase',
-    marginBottom:  spacing.m,
-  }}>
-    {children}
-  </div>
-)
-
-const SectionCard = ({ children }) => (
-  <div style={{
-    background:   colors.white,
-    borderRadius: radii.lg,
-    boxShadow:    shadows.sm,
-    padding:      spacing.l,
-  }}>
-    {children}
-  </div>
-)
+import { colors, fontFamilies, typeScale, spacing } from '@/tokens'
+import { Pill }                                     from '../../../Components'
+import { MetricsBar }                               from '../../../shared/MetricsBar'
+import { EdgeListDrawer }                           from '../../../shared/EdgeListDrawer'
+import { SectionHeading, SectionCard, EmptyState }  from '../../../shared/SectionParts'
 
 const SLA_DOT_COLOR = {
   green: colors.teal,
@@ -109,9 +85,7 @@ const ServicesTab = ({ detail }) => {
       <SectionCard>
         <SectionHeading>Provided services</SectionHeading>
         {provided.length === 0 ? (
-          <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colors.textTertiary }}>
-            No services provided.
-          </div>
+          <EmptyState text="No services provided." />
         ) : provided.map((s, i) => (
           <ServiceRow
             key={s.id}
@@ -128,9 +102,7 @@ const ServicesTab = ({ detail }) => {
       <SectionCard>
         <SectionHeading>Consumed services</SectionHeading>
         {consumed.length === 0 ? (
-          <div style={{ fontFamily: fontFamilies.body, fontSize: typeScale.body.size, color: colors.textTertiary }}>
-            No services consumed.
-          </div>
+          <EmptyState text="No services consumed." />
         ) : consumed.map((s, i) => (
           <ServiceRow
             key={s.id}

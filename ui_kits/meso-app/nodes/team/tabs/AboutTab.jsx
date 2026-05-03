@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
-import { colors, fontFamilies, typeScale, spacing, radii, shadows, duration, easing } from '@/tokens'
-import { Icon } from '../../../Components'
+import { colors, fontFamilies, typeScale, spacing, radii } from '@/tokens'
+import { Icon }                                            from '../../../Components'
+import { SectionHeading, SectionCard, EmptyState }         from '../../../shared/SectionParts'
+import { micro }                                           from '../../../shared/constants'
 
 // ── Sort order for authority rows ─────────────────────────────────────────────
 
@@ -12,46 +14,6 @@ const CHIP_VARIANTS = {
   advises:  { bg: colors.indigoSoft, text: colors.indigo },
   ratifies: { bg: colors.amberSoft,  text: colors.amber  },
 }
-
-// ── Shared sub-components ─────────────────────────────────────────────────────
-
-const SectionHeading = ({ children }) => (
-  <div style={{
-    fontFamily:    fontFamilies.body,
-    fontSize:      typeScale.labelA.size,
-    fontWeight:    typeScale.labelA.weight,
-    letterSpacing: typeScale.labelA.letterSpacing,
-    textTransform: typeScale.labelA.textTransform,
-    color:         colors.textTertiary,
-    marginBottom:  spacing.m,
-  }}>
-    {children}
-  </div>
-)
-
-const SectionCard = ({ children, style = {} }) => (
-  <div style={{
-    background:   colors.white,
-    borderRadius: radii.lg,
-    boxShadow:    shadows.sm,
-    padding:      spacing.l,
-    ...style,
-  }}>
-    {children}
-  </div>
-)
-
-const EmptyState = ({ text }) => (
-  <p style={{
-    fontFamily: fontFamilies.body,
-    fontSize:   typeScale.body.size,
-    color:      colors.textTertiary,
-    fontStyle:  'italic',
-    margin:     0,
-  }}>
-    {text}
-  </p>
-)
 
 // ── Authority chip ────────────────────────────────────────────────────────────
 
@@ -169,7 +131,7 @@ const ResponsibilityRow = ({ responsibility }) => {
             flexShrink: 0,
             marginTop:  3,
             transform:  open ? 'rotate(90deg)' : 'rotate(0deg)',
-            transition: `transform ${duration.micro} ${easing.out}`,
+            transition: `transform ${micro}`,
           }}
         />
         <span style={{
