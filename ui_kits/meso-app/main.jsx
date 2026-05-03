@@ -13,6 +13,8 @@ import { RoleDetail }                 from './nodes/role/RoleDetail'
 import { RolesScreen }                from './nodes/role/RolesScreen'
 import { ValueStreamDetail }          from './nodes/value-stream/ValueStreamDetail'
 import { ValueStreamScreen }          from './nodes/value-stream/ValueStreamScreen'
+import { CapabilityDetail }           from './nodes/capability/CapabilityDetail'
+import { CapabilityScreen }           from './nodes/capability/CapabilityScreen'
 
 // ─── Empty panel for unimplemented sections ───────────────────────────────────
 
@@ -151,6 +153,14 @@ function App() {
           )}
           {active === 'value-streams' && openValueStream && (
             <ValueStreamDetail valueStream={openValueStream} onTitleVisibilityChange={setTitleVisible} />
+          )}
+
+          {/* Capabilities */}
+          {active === 'capabilities' && !openCapability && (
+            <CapabilityScreen onOpenCapability={setOpenCapability} />
+          )}
+          {active === 'capabilities' && openCapability && (
+            <CapabilityDetail capability={openCapability} onTitleVisibilityChange={setTitleVisible} />
           )}
 
           {/* Everything else */}
