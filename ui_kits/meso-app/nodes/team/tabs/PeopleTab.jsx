@@ -171,7 +171,7 @@ const PeopleOverviewCard = ({ members, asOf }) => {
 const PeopleTab = ({ detail }) => {
   const roleCount    = detail.members.length
   const memberCount  = detail.members.filter(m => !m.isVacant).length
-  const vacancyCount = detail.members.filter(m =>  m.isVacant).length
+  const vacancyCount = roleCount - memberCount
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.l }}>
@@ -182,7 +182,7 @@ const PeopleTab = ({ detail }) => {
 
         <SectionCard style={{ flex: 1 }}>
           <SectionHeading>Team leads</SectionHeading>
-          {detail.leads.length === 0 ? (
+          {(detail.leads ?? []).length === 0 ? (
             <div style={{
               fontFamily: fontFamilies.body,
               fontSize:   typeScale.body.size,
@@ -193,10 +193,10 @@ const PeopleTab = ({ detail }) => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-              {detail.leads.map((lead, i) => (
+              {(detail.leads ?? []).map((lead, i) => (
                 <div
                   key={lead.id}
-                  style={{ borderBottom: i < detail.leads.length - 1 ? `1px solid ${colors.border}` : 'none' }}
+                  style={{ borderBottom: i < (detail.leads ?? []).length - 1 ? `1px solid ${colors.border}` : 'none' }}
                 >
                   <PersonCard
                     name={lead.name}

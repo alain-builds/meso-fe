@@ -7,25 +7,77 @@ const initials = (name) => {
   return name.split(' ').slice(0, 2).map(s => s[0]?.toUpperCase() ?? '').join('')
 }
 
-const GRID = '1fr 1fr 80px 80px 88px'
+// Fixed-pixel tracks assume a minimum panel width of ~640px; flex columns absorb narrower widths.
+const GRID = '1fr 1fr 80px 140px 80px 88px'
 
 const COLUMNS = [
-  { key: 'name',   label: 'Name',   sortable: true },
-  { key: 'role',   label: 'Role',   sortable: true },
-  { key: 'type',   label: 'Type',   sortable: true },
-  { key: 'since',  label: 'Since',  sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
+  { key: 'name',   label: 'Name',         sortable: true },
+  { key: 'role',   label: 'Role',         sortable: true },
+  { key: 'type',   label: 'Type',         sortable: true },
+  { key: 'entity', label: 'Legal Entity', sortable: true },
+  { key: 'since',  label: 'Since',        sortable: true },
+  { key: 'status', label: 'Status',       sortable: true },
 ]
 
 const getSortValue = (member, col) => {
   switch (col) {
-    case 'name':   return member.isVacant ? '￿' : (member.name ?? '').toLowerCase()
+    case 'name':   return member.isVacant ? '' : (member.name ?? '').toLowerCase()
     case 'role':   return (member.role ?? '').toLowerCase()
     case 'type':   return member.isVacant ? 'z_vacant' : member.isExternal ? 'b_external' : 'a_internal'
+    case 'entity': return (member.legalEntity ?? '').toLowerCase()
     case 'since':  return member.staffedAt ?? ''
     case 'status': return member.isVacant ? 1 : 0
     default:       return ''
   }
+}
+
+const ENTITY_BADGE_FONT_SIZE = '9px'
+
+// Deterministic color from company name — picks from a small dark palette
+const ENTITY_COLORS = ['#1a1a2e', '#0f3460', '#533483', '#1b4332', '#7c3626']
+const entityColor = (name) => {
+  let hash = 0
+  for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) & 0xffff
+  return ENTITY_COLORS[hash % ENTITY_COLORS.length]
+}
+
+const CompanyBadge = ({ name }) => {
+  if (!name) return (
+    <span style={{ fontFamily: fontFamilies.body, fontSize: typeScale.labelB.size, color: colors.textTertiary }}>
+      —
+    </span>
+  )
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+      <div style={{
+        width:          18,
+        height:         18,
+        borderRadius:   radii.sm,
+        background:     entityColor(name),
+        color:          '#fff',
+        fontSize:       ENTITY_BADGE_FONT_SIZE,
+        fontWeight:     700,
+        fontFamily:     fontFamilies.body,
+        letterSpacing:  '0.02em',
+        display:        'flex',
+        alignItems:     'center',
+        justifyContent: 'center',
+        flexShrink:     0,
+      }}>
+        {name.trim()[0]?.toUpperCase() ?? '?'}
+      </div>
+      <span style={{
+        fontFamily:   fontFamilies.body,
+        fontSize:     typeScale.labelB.size,
+        color:        colors.textSecondary,
+        overflow:     'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace:   'nowrap',
+      }}>
+        {name}
+      </span>
+    </div>
+  )
 }
 
 const HoverChip = ({ children, style }) => {
@@ -39,6 +91,8 @@ const HoverChip = ({ children, style }) => {
         display:      'inline-flex',
         alignItems:   'center',
         gap:          spacing.s,
+        // Negative margin cancels the padding so content position stays aligned in the grid;
+        // the background bleeds slightly beyond the cell boundary on hover.
         padding:      `4px 8px`,
         margin:       `-4px -8px`,
         borderRadius: radii.md,
@@ -86,14 +140,14 @@ const MemberRow = memo(({ member }) => (
           —
         </div>
         <span style={{
-          fontFamily: fontFamilies.body,
-          fontSize:   typeScale.ui.size,
-          fontWeight: 400,
-          color:      colors.textTertiary,
-          minWidth:   0,
-          overflow:   'hidden',
+          fontFamily:   fontFamilies.body,
+          fontSize:     typeScale.ui.size,
+          fontWeight:   400,
+          color:        colors.textTertiary,
+          minWidth:     0,
+          overflow:     'hidden',
           textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          whiteSpace:   'nowrap',
         }}>
           Vacant
         </span>
@@ -131,8 +185,8 @@ const MemberRow = memo(({ member }) => (
       </HoverChip>
     )}
 
-    {/* Role */}
-    <HoverChip style={{ gap: 0 }}>
+    {/* Role — chip stretches to fill full row height */}
+    <HoverChip style={{ gap: 0, display: 'flex', alignSelf: 'stretch', alignItems: 'center' }}>
       <span style={{
         fontFamily:   fontFamilies.body,
         fontSize:     typeScale.labelB.size,
@@ -154,6 +208,15 @@ const MemberRow = memo(({ member }) => (
     }}>
       {member.isVacant ? '—' : member.isExternal ? 'External' : 'Internal'}
     </div>
+
+    {/* Legal Entity */}
+    {member.legalEntity ? (
+      <HoverChip style={{ gap: 0, display: 'flex', alignSelf: 'stretch', alignItems: 'center' }}>
+        <CompanyBadge name={member.legalEntity} />
+      </HoverChip>
+    ) : (
+      <span style={{ fontFamily: fontFamilies.body, fontSize: typeScale.labelB.size, color: colors.textTertiary }}>—</span>
+    )}
 
     {/* Since */}
     <div style={{
