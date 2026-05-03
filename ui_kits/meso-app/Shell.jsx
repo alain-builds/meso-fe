@@ -15,9 +15,11 @@ const SEARCH_PAD_X       = 12
 const RECORDS_HEADER_H   = 28   // fixed height shared by collapsed and expanded Records header
 
 const TOP_NAV = [
-  { id: 'canvas',    icon: 'layout-grid',    label: 'Canvas'    },
-  { id: 'strategy',  icon: 'arrow-up-right', label: 'Strategy'  },
-  { id: 'analytics', icon: 'bar-chart',      label: 'Analytics' },
+  { id: 'canvas',        icon: 'layout-grid',    label: 'Canvas'        },
+  { id: 'value-streams', icon: 'layers',          label: 'Value Streams' },
+  { id: 'capabilities',  icon: 'grid-3x3',        label: 'Capabilities'  },
+  { id: 'strategy',      icon: 'arrow-up-right',  label: 'Strategy'      },
+  { id: 'analytics',     icon: 'bar-chart',       label: 'Analytics'     },
 ]
 
 const BOTTOM_NAV = [
