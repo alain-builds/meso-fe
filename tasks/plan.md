@@ -1,7 +1,160 @@
-# Build plan: Value Stream and Capability nodes
+# Plan — Business Capability Map (Visual Column Layout)
 
-Spec: `SPEC.md`
-Data model authority: `data-model/graph.go`
+Spec: `SPEC-CAPABILITY-MAP.md`
+Touches: `capabilityData.js`, `CapabilityMap.jsx` (new), `CapabilityScreen.jsx`
+Does not touch: `main.jsx`, `CapabilityDetail.jsx`, any tab, any shared component.
+
+---
+
+## Dependency graph
+
+```
+Task 1: capabilityData.js   ← data layer; everything else depends on this
+    ↓
+Task 2: CapabilityMap.jsx   ← L1 columns + L2 cards (no L3 yet); isolated component
+    ↓
+Task 3: L3 nested items     ← extend CapabilityMap with L3 list inside L2 cards
+    ↓
+Task 4: Wire + verify       ← replace table in CapabilityScreen, run tests, smoke-test clicks
+```
+
+Each task produces a visible, runnable result before the next task begins.
+
+---
+
+## Task 1 — Replace capability data with the full SaaS model
+
+**Files:** `nodes/capability/capabilityData.js`
+
+**What to build:**
+- Delete all existing CAPABILITIES records (5 sparse stubs).
+- Populate a new flat array with the complete SaaS model:
+  - 8 L1 capabilities (null `parentCapabilityId`)
+  - ~56 L2 capabilities (one level deep)
+  - ~130 L3 stubs (two levels deep, 2–3 per L2)
+- Every record uses the existing shape (`id`, `name`, `description`, `parentCapabilityId`, `status`, `subCapabilities`, `owners`, `processes`, `valueStreams`, `createdAt`, `createdBy`, `updatedAt`, `updatedBy`).
+- L2 and L3 records have `subCapabilities: []`, `owners: []`, `processes: []`, `valueStreams: []`.
+- L1 records have `subCapabilities` populated with references to their direct L2 children (id + name).
+- `DEFAULT_CAPABILITY` unchanged and still exported.
+- ID scheme: `cap-l1-[slug]`, `cap-l2-[slug]`, `cap-l3-[slug]`.
+
+**L1 → L2 mapping (from spec):**
+
+| L1 id | L1 name | L2 count |
+|---|---|---|
+| cap-l1-product-development | Product Development | 7 |
+| cap-l1-platform-operations | Platform & Service Operations | 5 |
+| cap-l1-account-management | Account Management | 8 |
+| cap-l1-enterprise-support | Enterprise Support | 9 |
+| cap-l1-demand-generation | Demand Generation | 8 |
+| cap-l1-people-operations | People Operations | 7 |
+| cap-l1-financial-services | Financial Services | 6 |
+| cap-l1-it-management | IT Management | 6 |
+
+**Acceptance criteria:**
+- `CAPABILITIES.filter(c => !c.parentCapabilityId).length === 8`
+- `CAPABILITIES.filter(c => c.parentCapabilityId?.startsWith('cap-l1')).length >= 50`
+- `CAPABILITIES.filter(c => c.parentCapabilityId?.startsWith('cap-l2')).length >= 100`
+- `deriveLevel` returns `'l1'` / `'l2'` / `'l3'` correctly for spot-checked records
+- `DEFAULT_CAPABILITY` still exported
+
+**Verification:** Dev server restart → browser console spot-check of level derivation.
+
+---
+
+## Checkpoint A — Data shape verified
+
+Before Task 2: confirm 8 L1s present and `deriveLevel` returns correct values.
+
+---
+
+## Task 2 — Build CapabilityMap component (L1 columns + L2 cards)
+
+**Files:** `nodes/capability/CapabilityMap.jsx` (new)
+
+**What to build:**
+- Props: `{ capabilities, onOpenCapability }`
+- Derive tree from flat array (no useMemo — pure from props):
+  - `l1s = capabilities.filter(c => !c.parentCapabilityId)`
+  - per l1: `l2s = capabilities.filter(c => c.parentCapabilityId === l1.id)`
+- Horizontally scrollable flex row, one 220px fixed-width column per L1.
+- Each column:
+  - **L1 header** — `colors.teal` bg, `colors.white` text, `fontFamilies.display`, `typeScale.ui.size`, `fontWeight 600`, `radii.md` on top corners. Clickable → `onOpenCapability(l1)`.
+  - **L2 cards** stacked below — `colors.white`, `1px solid colors.border`, `radii.md`, `shadows.sm` at rest → `shadows.md` + `translateY(-2px)` on hover. `fontFamilies.body`, `typeScale.ui.size`, `fontWeight 500`, `colors.ink`. Clickable → `onOpenCapability(l2)`.
+- L3 items not yet rendered.
+- Transitions: `easing.out`.
+
+**Acceptance criteria:**
+- 8 teal column headers in a scrollable row.
+- L2 cards beneath each header; card hover state works.
+- Clicking L1 and L2 opens `CapabilityDetail`. No hardcoded colours.
+
+---
+
+## Task 3 — Add L3 nested items inside L2 cards
+
+**Files:** `nodes/capability/CapabilityMap.jsx` (extend)
+
+**What to build:**
+- Per L2: `l3s = capabilities.filter(c => c.parentCapabilityId === l2.id)`
+- If `l3s.length > 0`: render list below L2 name, separated by `1px solid colors.border` top border.
+- Each L3 item: `fontFamilies.body`, `typeScale.labelB.size`, `colors.textSecondary`, `spacing.xs` vertical padding, `spacing.m` horizontal, hover bg `colorVars.stone`. Clickable → `onOpenCapability(l3)`.
+- L2 cards with no L3 children unchanged.
+
+**Acceptance criteria:**
+- L3 items visible inside L2 cards.
+- Empty-L3 cards have no extra whitespace.
+- Clicking any L3 item → `CapabilityDetail` with correct name and "L3" level badge.
+
+---
+
+## Checkpoint B — Map component complete
+
+Before Task 4: all three levels render, are clickable, navigate correctly. Visual issues resolved here.
+
+---
+
+## Task 4 — Wire CapabilityMap into CapabilityScreen + verify
+
+**Files:** `nodes/capability/CapabilityScreen.jsx`
+
+**What to build:**
+- Import `CapabilityMap`.
+- Remove `<Card>` + `<table>` block.
+- Replace with `<CapabilityMap capabilities={CAPABILITIES} onOpenCapability={onOpenCapability} />`.
+- Remove `CAPABILITY_ROWS` constant (no longer needed).
+- Remove unused imports (`Card`, `Pill`, `LevelBadge`, `deriveLevel`) — only those confirmed unused.
+
+**Acceptance criteria:**
+- Map renders; table is gone.
+- Page header unchanged.
+- `npm run test` exits clean.
+- Click L1, L2, L3 → correct `CapabilityDetail`; back/breadcrumb returns to map.
+- No regressions on Teams, People, Roles, Value Streams.
+
+**Verification steps:**
+1. `npm run test`
+2. Navigate to Capabilities — map renders.
+3. Click one of each level — correct detail opens.
+4. Breadcrumb / back — returns to map.
+5. Switch to Teams, People, Roles, Value Streams — no breakage.
+
+---
+
+## Summary
+
+| Task | File(s) | Deliverable |
+|---|---|---|
+| 1 | `capabilityData.js` | Full SaaS model — 8 L1 + 56 L2 + ~130 L3 |
+| **Checkpoint A** | — | Data shape verified |
+| 2 | `CapabilityMap.jsx` | L1 columns + L2 cards, interactive |
+| 3 | `CapabilityMap.jsx` | L3 items nested in L2 cards |
+| **Checkpoint B** | — | Map component complete |
+| 4 | `CapabilityScreen.jsx` | Table replaced, tests passing |
+
+**New files:** 1 (`CapabilityMap.jsx`).
+**Files modified:** 2 (`capabilityData.js`, `CapabilityScreen.jsx`).
+**Files untouched:** everything else.
 
 ---
 

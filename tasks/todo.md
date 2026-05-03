@@ -1,13 +1,17 @@
-# Todo — Value Stream and Capability nodes
+# Todo — Business Capability Map (Visual Column Layout)
 
-- [ ] **Task 1** — main.jsx plumbing  
-  Add `openValueStream` + `openCapability` state, extend `openNode` / `navigateTo` / `closeNode`, replace `buildBreadcrumbs` with `TOP_SECTION_IDS` version, extend `EmptyPanel` guard.  
-  ✓ Gate: app loads, existing sections unaffected, VS/Cap show EmptyPanel.
+- [ ] **Task 1** — Replace capability data with full SaaS model  
+  Rewrite `capabilityData.js`: 8 L1 + ~56 L2 + ~130 L3. Same record shape. DEFAULT_CAPABILITY unchanged.  
+  ✓ Gate: 8 L1s, 50+ L2s, 100+ L3s in array; `deriveLevel` returns correct level for spot-checked records.
 
-- [ ] **Task 2** — Value Stream node (complete)  
-  Create `nodes/value-stream/` with `ValueStreamDetail.jsx`, `ValueStreamScreen.jsx`, and 5 tabs (`AboutTab`, `ContributorsTab`, `ProcessesTab`, `CapabilitiesTab`, `KPIsTab`). Add imports + routing to `main.jsx`.  
-  ✓ Gate: list renders 3 rows; all 5 tabs show mock data; breadcrumbs + back button work.
+- [ ] **Task 2** — Build CapabilityMap component (L1 + L2)  
+  Create `CapabilityMap.jsx`: horizontal scroll row, one 220px column per L1, teal L1 header, white L2 cards with hover shadow. All items clickable → `onOpenCapability`.  
+  ✓ Gate: 8 teal headers visible; L2 cards below each; clicking L1 and L2 opens CapabilityDetail.
 
-- [ ] **Task 3** — Capability node (complete)  
-  Create `nodes/capability/` with `CapabilityDetail.jsx`, `CapabilityScreen.jsx`, and 5 tabs (`AboutTab`, `SubCapabilitiesTab`, `OwnersTab`, `ProcessesTab`, `ValueStreamsTab`). Add imports + routing to `main.jsx`.  
-  ✓ Gate: list renders 5 rows with level; all 5 tabs show mock data; breadcrumbs + back button work; no regressions.
+- [ ] **Task 3** — Add L3 nested items inside L2 cards  
+  Extend `CapabilityMap.jsx`: L3 items listed inside L2 cards with `colorVars.stone` hover. Each item individually clickable.  
+  ✓ Gate: L3 items visible; clicking opens CapabilityDetail showing "L3" level badge.
+
+- [ ] **Task 4** — Wire CapabilityMap into CapabilityScreen + verify  
+  Replace `<table>` with `<CapabilityMap>` in `CapabilityScreen.jsx`. Remove unused imports. Run tests.  
+  ✓ Gate: map renders (no table); `npm run test` green; click L1/L2/L3 → correct detail; back works; no regressions.
