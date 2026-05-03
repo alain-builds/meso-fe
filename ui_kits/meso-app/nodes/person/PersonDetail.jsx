@@ -1,4 +1,4 @@
-import { NodeDetailShell }       from '../../NodeDetailShell'
+import { NodeDetailShell }       from '../../shared/NodeDetailShell'
 import { AboutTab }              from './tabs/AboutTab'
 import { PositionsTab }          from './tabs/PositionsTab'
 import { TeamsCommunitiesTab }   from './tabs/TeamsCommunitiesTab'

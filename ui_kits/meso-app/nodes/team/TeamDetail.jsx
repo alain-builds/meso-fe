@@ -1,4 +1,4 @@
-import { NodeDetailShell }     from '../../NodeDetailShell'
+import { NodeDetailShell }     from '../../shared/NodeDetailShell'
 import { NodeOverviewPanel }   from '../../shared/NodeOverviewPanel'
 import { getTeamOverviewFields } from './teamOverviewConfig'
 import { AboutTab }            from './tabs/AboutTab'

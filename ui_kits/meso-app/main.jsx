@@ -5,7 +5,7 @@ import '../../colors_and_type.css'
 import './app.css'
 import { Sidebar, Header }            from './Shell'
 import { Button, Modal, Toast }       from './Components'
-import { TeamsScreen }                 from './TeamsScreen'
+import { TeamsScreen }                 from './nodes/team/TeamsScreen'
 import { TeamDetail }                 from './nodes/team/TeamDetail'
 import { PersonDetail }               from './nodes/person/PersonDetail'
 import { PeopleScreen }               from './nodes/person/PeopleScreen'
@@ -37,33 +37,45 @@ function EmptyPanel({ label }) {
   )
 }
 
-const RECORD_IDS = new Set(['people', 'roles', 'teams', 'services', 'processes', 'governance-bodies'])
+const RECORD_IDS      = new Set(['people', 'roles', 'teams', 'services', 'processes', 'governance-bodies'])
+const TOP_SECTION_IDS = new Set(['value-streams', 'capabilities'])
 
 function buildBreadcrumbs(active, openNode, closeNode) {
-  const label = active.charAt(0).toUpperCase() + active.slice(1).replace(/-/g, ' ')
+  const label    = active.charAt(0).toUpperCase() + active.slice(1).replace(/-/g, ' ')
+  const nodeName = openNode?.name ?? openNode?.roleName
+
+  if (openNode && RECORD_IDS.has(active)) return [
+    { label: 'Records', onClick: null      },
+    { label: label,     onClick: closeNode },
+    { label: nodeName,  onClick: null      },
+  ]
   if (openNode) return [
-    { label: 'Records',                           onClick: null      },
-    { label: label,                               onClick: closeNode },
-    { label: openNode.name ?? openNode.roleName,  onClick: null      },
+    { label: label,    onClick: closeNode },
+    { label: nodeName, onClick: null      },
   ]
   if (RECORD_IDS.has(active)) return [
     { label: 'Records', onClick: null },
     { label: label,     onClick: null },
   ]
+  if (TOP_SECTION_IDS.has(active)) return [
+    { label: label, onClick: null },
+  ]
   return []
 }
 
 function App() {
-  const [active,       setActive]       = useState('teams')
-  const [openTeam,     setOpenTeam]     = useState(null)
-  const [openPerson,   setOpenPerson]   = useState(null)
-  const [openRole,     setOpenRole]     = useState(null)
+  const [active,           setActive]           = useState('teams')
+  const [openTeam,         setOpenTeam]         = useState(null)
+  const [openPerson,       setOpenPerson]       = useState(null)
+  const [openRole,         setOpenRole]         = useState(null)
+  const [openValueStream,  setOpenValueStream]  = useState(null)
+  const [openCapability,   setOpenCapability]   = useState(null)
   const [modal,        setModal]        = useState(false)
   const [toast,        setToast]        = useState(null)
   const [loading,      setLoading]      = useState(true)
   const [titleVisible, setTitleVisible] = useState(true)
 
-  const openNode = openTeam ?? openPerson ?? openRole
+  const openNode = openTeam ?? openPerson ?? openRole ?? openValueStream ?? openCapability
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 800)
@@ -80,6 +92,8 @@ function App() {
     setOpenTeam(null)
     setOpenPerson(null)
     setOpenRole(null)
+    setOpenValueStream(null)
+    setOpenCapability(null)
     setTitleVisible(true)
   }
 
@@ -87,6 +101,8 @@ function App() {
     setOpenTeam(null)
     setOpenPerson(null)
     setOpenRole(null)
+    setOpenValueStream(null)
+    setOpenCapability(null)
     setTitleVisible(true)
   }, [])
 
@@ -128,7 +144,7 @@ function App() {
           )}
 
           {/* Everything else */}
-          {!['teams', 'people', 'roles'].includes(active) && !openNode && (
+          {!['teams', 'people', 'roles', 'value-streams', 'capabilities'].includes(active) && !openNode && (
             <EmptyPanel label={active} />
           )}
         </div>
